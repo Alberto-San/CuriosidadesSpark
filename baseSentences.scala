@@ -98,3 +98,32 @@ spark.read
     .option("sep", ",")
     .option("nullValue", "")
     .csv("src/main/resources/data/stocks.csv")
+
+
+/*
+Columns and expressions
+*/
+
+// various select methods
+import spark.implicits._
+carsDF.select(
+  carsDF.col("Name"),
+  col("Acceleration"),
+  column("Weight_in_lbs"),
+  'Year, // Scala Symbol, auto-converted to column
+  $"Horsepower", // fancier interpolated string, returns a Column object
+  expr("Origin") // EXPRESSION
+)
+
+val americanPowerfulCarsDF3 = carsDF.filter("Origin = 'USA' and Horsepower > 150")
+val americanPowerfulCarsDF2 = carsDF.filter(col("Origin") === "USA" and col("Horsepower") > 150)
+val allCarsDF = carsDF.union(moreCarsDF) // works if the DFs have the same schema
+val moviesProfitDF2 = moviesDF.selectExpr(
+    "Title",
+    "US_Gross",
+    "Worldwide_Gross",
+    "US_Gross + Worldwide_Gross as Total_Gross"
+  )
+val carsWithColumnRenamed = carsDF.withColumnRenamed("Weight_in_lbs", "Weight in pounds")
+val carsWithKg3DF = carsDF.withColumn("Weight_in_kg_3", col("Weight_in_lbs") / 2.2)
+carsWithColumnRenamed.drop("Cylinders", "Displacement")
