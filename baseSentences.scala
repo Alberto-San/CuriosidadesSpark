@@ -52,3 +52,49 @@ object DataFramesBasics extends App {
       .getOrCreate()
   //Spark Code ....
  }
+
+
+/*
+Read from a postgress db:
+1. Import the library from sbt or maven
+....
+libraryDependencies ++= Seq(
+  ...
+  // postgres for DB connectivity
+  "org.postgresql" % "postgresql" % postgresVersion
+)
+*/
+
+// Reading from a remote DB
+val driver = "org.postgresql.Driver"
+val url = "jdbc:postgresql://localhost:5432/rtjvm"
+val user = "docker"
+val password = "docker"
+
+val employeesDF = spark.read
+    .format("jdbc")
+    .option("driver", driver) // 
+    .option("url", url)
+    .option("user", user)
+    .option("password", password)
+    .option("dbtable", "public.employees")
+    .load()
+
+/*
+Read dates with custom format type
+*/
+
+spark.read
+    .schema(carsSchema)
+    .option("dateFormat", "YYYY-MM-dd") // couple with schema; if Spark fails parsing, it will put null
+    .option("allowSingleQuotes", "true")
+    .option("compression", "uncompressed") // bzip2, gzip, lz4, snappy, deflate
+    .json("src/main/resources/data/cars.json")
+
+spark.read
+    .schema(stocksSchema)
+    .option("dateFormat", "MMM dd YYYY")
+    .option("header", "true")
+    .option("sep", ",")
+    .option("nullValue", "")
+    .csv("src/main/resources/data/stocks.csv")
