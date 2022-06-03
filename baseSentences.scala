@@ -127,3 +127,24 @@ val moviesProfitDF2 = moviesDF.selectExpr(
 val carsWithColumnRenamed = carsDF.withColumnRenamed("Weight_in_lbs", "Weight in pounds")
 val carsWithKg3DF = carsDF.withColumn("Weight_in_kg_3", col("Weight_in_lbs") / 2.2)
 carsWithColumnRenamed.drop("Cylinders", "Displacement")
+
+
+
+/*
+Aggregations
+*/
+
+// counting
+val genresCountDF = moviesDF.select(count(col("Major_Genre"))) // all the values except null
+moviesDF.selectExpr("count(Major_Genre)")
+
+// counting all
+moviesDF.select(count("*")) // count all the rows, and will INCLUDE nulls
+
+// counting distinct
+moviesDF.select(countDistinct(col("Major_Genre"))).show()
+
+// approximate count
+moviesDF.select(approx_count_distinct(col("Major_Genre")))
+
+
