@@ -346,7 +346,7 @@ root
 +------------------------+
 */
 
-
+/*
 
 '''Printing arrayA, field1 and field2 using dot '''
 df_child = df_nested_arraytype.select(
@@ -567,4 +567,22 @@ root
 |   1|   2|null|
 +----+----+----+
 */
+*/
 
+// 1 - with col operators
+moviesDF
+  .select(col("Title"), struct(col("US_Gross"), col("Worldwide_Gross")).as("Profit"))
+  .select(col("Title"), col("Profit").getField("US_Gross").as("US_Profit"))
+
+// 2 - with expression strings
+moviesDF
+  .selectExpr("Title", "(US_Gross, Worldwide_Gross) as Profit")
+  .selectExpr("Title", "Profit.US_Gross")
+
+val moviesWithWords = moviesDF.select(col("Title"), split(col("Title"), " |,").as("Title_Words")) // ARRAY of strings
+moviesWithWords.select(
+    col("Title"),
+    expr("Title_Words[0]"), // indexing
+    size(col("Title_Words")), // array size
+    array_contains(col("Title_Words"), "Love") // look for value in array
+  )
