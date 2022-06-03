@@ -215,14 +215,14 @@ structureData = [
   ]
 
 structureSchema = StructType([
-        StructField('name', StructType([
-             StructField('firstname', StringType(), True),
-             StructField('middlename', StringType(), True),
-             StructField('lastname', StringType(), True)
+        StructField("name", StructType([
+             StructField("firstname", StringType(), True),
+             StructField("middlename", StringType(), True),
+             StructField("lastname", StringType(), True)
              ])),
-         StructField('id', StringType(), True),
-         StructField('gender', StringType(), True),
-         StructField('salary', IntegerType(), True)
+         StructField("id", StringType(), True),
+         StructField("gender", StringType(), True),
+         StructField("salary", IntegerType(), True)
          ])
 df_struct = spark.createDataFrame(data=structureData,schema=structureSchema)
 df_struct.show(truncate=False)
@@ -384,4 +384,105 @@ root
 +--------------------------+
 */
 
+// Working with structs and arrays
+arrayArrayData = [
+  ("James",[["Java","Scala","C++"],["Spark","Java"]]),
+  ("Michael",[["Spark","Java","C++"],["Spark","Java"]]),
+  ("Robert",[["CSharp","VB"],["Spark","Python"]])
+]
 
+df = spark.createDataFrame(data=arrayArrayData, schema = ['name','subjects'])
+df.printSchema()
+df.show(truncate=False)
+
+/*
+root
+ |-- name: string (nullable = true)
+ |-- subjects: array (nullable = true)
+ |    |-- element: array (containsNull = true)
+ |    |    |-- element: string (containsNull = true)
+
++-------+-----------------------------------+
+|name   |subjects                           |
++-------+-----------------------------------+
+|James  |[[Java, Scala, C++], [Spark, Java]]|
+|Michael|[[Spark, Java, C++], [Spark, Java]]|
+|Robert |[[CSharp, VB], [Spark, Python]]    |
++-------+-----------------------------------+
+*/
+// Explode
+import pyspark
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import explode
+from pyspark.sql.functions import flatten
+from pyspark.sql.functions import arrays_zip, col
+from functools import reduce
+from pyspark.sql import DataFrame
+df_explode=df.select(df.name,explode(df.subjects).alias("Exploded_Subjects"))
+df_explode.show(truncate=False)
+/*
+root
+ |-- name: string (nullable = true)
+ |-- Exploded_Subjects: array (nullable = true)
+ |    |-- element: string (containsNull = true)
+
++-------+------------------+
+|name   |Exploded_Subjects |
++-------+------------------+
+|James  |[Java, Scala, C++]|
+|James  |[Spark, Java]     |
+|Michael|[Spark, Java, C++]|
+|Michael|[Spark, Java]     |
+|Robert |[CSharp, VB]      |
+|Robert |[Spark, Python]   |
++-------+------------------+
+*/
+
+//Flatten
+df_flatten=df.select(df.name,flatten(df.subjects).alias("Flattened_Subjects"))
+df_flatten.printSchema()
+df_flatten.show(truncate=False)
+
+/*
+root
+ |-- name: string (nullable = true)
+ |-- Flattened_Subjects: array (nullable = true)
+ |    |-- element: string (containsNull = true)
+
++-------+-------------------------------+
+|name   |Flattened_Subjects             |
++-------+-------------------------------+
+|James  |[Java, Scala, C++, Spark, Java]|
+|Michael|[Spark, Java, C++, Spark, Java]|
+|Robert |[CSharp, VB, Spark, Python]    |
++-------+-------------------------------+
+*/
+
+//zipp Array and explode
+df_flatten_zip=df_flatten \
+               .withColumn("zippedArray", arrays_zip("Flattened_Subjects"))  \
+               .withColumn("explodeZipped", explode("zippedArray")) \
+               .withColumn("data", col("explodeZipped.Flattened_Subjects"))
+
+df_flatten_zip.printSchema()
+df_flatten_zip.show(truncate=False)
+/*
++-------+-------------------------------+-----------------------------------------+-------------+------+
+|name   |Flattened_Subjects             |zippedArray                              |explodeZipped|data  |
++-------+-------------------------------+-----------------------------------------+-------------+------+
+|James  |[Java, Scala, C++, Spark, Java]|[{Java}, {Scala}, {C++}, {Spark}, {Java}]|{Java}       |Java  |
+|James  |[Java, Scala, C++, Spark, Java]|[{Java}, {Scala}, {C++}, {Spark}, {Java}]|{Scala}      |Scala |
+|James  |[Java, Scala, C++, Spark, Java]|[{Java}, {Scala}, {C++}, {Spark}, {Java}]|{C++}        |C++   |
+|James  |[Java, Scala, C++, Spark, Java]|[{Java}, {Scala}, {C++}, {Spark}, {Java}]|{Spark}      |Spark |
+|James  |[Java, Scala, C++, Spark, Java]|[{Java}, {Scala}, {C++}, {Spark}, {Java}]|{Java}       |Java  |
+|Michael|[Spark, Java, C++, Spark, Java]|[{Spark}, {Java}, {C++}, {Spark}, {Java}]|{Spark}      |Spark |
+|Michael|[Spark, Java, C++, Spark, Java]|[{Spark}, {Java}, {C++}, {Spark}, {Java}]|{Java}       |Java  |
+|Michael|[Spark, Java, C++, Spark, Java]|[{Spark}, {Java}, {C++}, {Spark}, {Java}]|{C++}        |C++   |
+|Michael|[Spark, Java, C++, Spark, Java]|[{Spark}, {Java}, {C++}, {Spark}, {Java}]|{Spark}      |Spark |
+|Michael|[Spark, Java, C++, Spark, Java]|[{Spark}, {Java}, {C++}, {Spark}, {Java}]|{Java}       |Java  |
+|Robert |[CSharp, VB, Spark, Python]    |[{CSharp}, {VB}, {Spark}, {Python}]      |{CSharp}     |CSharp|
+|Robert |[CSharp, VB, Spark, Python]    |[{CSharp}, {VB}, {Spark}, {Python}]      |{VB}         |VB    |
+|Robert |[CSharp, VB, Spark, Python]    |[{CSharp}, {VB}, {Spark}, {Python}]      |{Spark}      |Spark |
+|Robert |[CSharp, VB, Spark, Python]    |[{CSharp}, {VB}, {Spark}, {Python}]      |{Python}     |Python|
++-------+-------------------------------+-----------------------------------------+-------------+------+
+*/
