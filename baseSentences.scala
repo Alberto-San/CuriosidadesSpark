@@ -590,6 +590,12 @@ moviesWithWords.select(
 
 /*******************************************************************************************************************
 Datasets
+DataFrame actually enjoys better performance than Dataset. The reason for this is that Spark can understand the internals of the built-in functions associated with DataFrame and this enables the Catalyst optimization (rearrange and change the execution tree) as well as performing wholestage codegen to avoid a lot of the virtualization.
+Another advantage of Dataframe is that it's schema is set at run time rather than at compile time. This means that if you read for example from a parquet file, the schema would be set by the content of the file. This enables to handle dynamic cases (e.g. to perform ETL)
+https://stackoverflow.com/questions/54019955/why-dataframe-still-there-in-spark-2-2-also-even-dataset-gives-more-performance
+Datasets is an intermedia between RDDs and DataFrames, compiles everything in terms of logical JVM objects.
+When it comes to serializing data, the Dataset API has the concept of encoders which translate between JVM representations (objects) and Spark’s internal binary format. 
+https://stackoverflow.com/questions/31508083/difference-between-dataframe-dataset-and-rdd-in-spark
 *******************************************************************************************************************/
 
 def readDF(filename: String) = spark.read
