@@ -497,3 +497,74 @@ df_flatten_zip.show(truncate=False)
 |Robert |[CSharp, VB, Spark, Python]    |[{CSharp}, {VB}, {Spark}, {Python}]      |{Python}     |Python|
 +-------+-------------------------------+-----------------------------------------+-------------+------+
 */
+
+
+//Maps
+data = [({'a': 1, 'b': 2},), ({'c':3},), ({'a': 4, 'c': 5},)]
+df_map = spark.createDataFrame(data, ["column"])
+df_map.printSchema()
+df_map.show()
+/*
+root
+ |-- column: map (nullable = true)
+ |    |-- key: string
+ |    |-- value: long (valueContainsNull = true)
+
++----------------+
+|          column|
++----------------+
+|{a -> 1, b -> 2}|
+|        {c -> 3}|
+|{a -> 4, c -> 5}|
++----------------+
+*/
+
+from pyspark.sql.session import SparkSession
+from pyspark.sql import Row
+import pyspark.sql.functions as f
+''' Flattening map'''
+df_new = df_map.select(
+    f.struct(*[f.col("column").getItem(c).alias(c) for c in ["a", "b", "c"]]).alias("a")
+)
+df_new.show()
+/*
+root
+ |-- a: struct (nullable = false)
+ |    |-- a: long (nullable = true)
+ |    |-- b: long (nullable = true)
+ |    |-- c: long (nullable = true)
+
++---------------+
+|              a|
++---------------+
+|   {1, 2, null}|
+|{null, null, 3}|
+|   {4, null, 5}|
++---------------+
+*/
+
+'''Flattening maptype to rows'''
+df = df_map.withColumn("id", f.monotonically_increasing_id())\
+    .select("id", f.explode("column"))\
+    .groupby("id")\
+    .pivot("key")\
+    .agg(f.first("value"))\
+    .drop("id")\
+
+df.printSchema()
+df.show()
+/*
+root
+ |-- a: long (nullable = true)
+ |-- b: long (nullable = true)
+ |-- c: long (nullable = true)
+
++----+----+----+
+|   a|   b|   c|
++----+----+----+
+|   4|null|   5|
+|null|null|   3|
+|   1|   2|null|
++----+----+----+
+*/
+
