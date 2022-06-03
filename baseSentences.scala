@@ -147,4 +147,241 @@ moviesDF.select(countDistinct(col("Major_Genre"))).show()
 // approximate count
 moviesDF.select(approx_count_distinct(col("Major_Genre")))
 
+val countByGenreDF = moviesDF
+  .groupBy(col("Major_Genre")) // includes null
+  .count()  // select count(*) from moviesDF group by Major_Genre
+
+val aggregationsByGenreDF = moviesDF
+    .groupBy(col("Major_Genre"))
+    .agg(
+      count("*").as("N_Movies"),
+      avg("IMDB_Rating").as("Avg_Rating")
+    )
+    .orderBy(col("Avg_Rating"))
+
+moviesDF
+    .groupBy("Director")
+    .agg(
+      avg("IMDB_Rating").as("Avg_Rating"),
+      sum("US_Gross").as("Total_US_Gross")
+    )
+    .orderBy(col("Avg_Rating").desc_nulls_last)
+
+/*
+join types
+*/
+val guitaristsBandsDF = guitaristsDF.join(bandsDF, joinCondition, "inner")
+guitaristsDF.join(bandsDF, joinCondition, "left_outer") // left outer = everything in the inner join + all the rows in the LEFT table, with nulls in where the data is missing
+guitaristsDF.join(bandsDF, joinCondition, "right_outer") // right outer = everything in the inner join + all the rows in the RIGHT table, with nulls in where the data is missing
+guitaristsDF.join(bandsDF, joinCondition, "outer") // outer join = everything in the inner join + all the rows in BOTH tables, with nulls in where the data is missing
+guitaristsDF.join(bandsDF, joinCondition, "left_semi") // semi-joins = everything in the left DF for which there is a row in the right DF satisfying the condition
+guitaristsDF.join(bandsDF, joinCondition, "left_anti") // anti-joins = everything in the left DF for which there is NO row in the right DF satisfying the condition
+guitaristsDF.join(bandsModDF, guitaristsDF.col("band") === bandsModDF.col("bandId")) //default inner
+guitaristsDF.join(guitarsDF.withColumnRenamed("id", "guitarId"), expr("array_contains(guitars, guitarId)")) // using complex types
+
+
+/*
+Common Types: Boilerplate
+*/
+// correlation = number between -1 and 1
+println(moviesDF.stat.corr("Rotten_Tomatoes_Rating", "IMDB_Rating") /* corr is an ACTION */)
+carsDF.select(initcap(col("Name"))) // capitalization: initcap, lower, upper
+carsDF.select("*").where(col("Name").contains("volkswagen")) // contains
+//The fold method takes two sets of arguments. One contains a start value and the other a combining function.
+val list = List(1, 2, 3, 4, 5)
+val sum = list.fold(0)((x, y) => x + y)
+assert(sum == 15)
+def getCarNames: List[String] = List("Volkswagen", "Mercedes-Benz", "Ford")
+val carNameFilters = getCarNames.map(_.toLowerCase()).map(name => col("Name").contains(name)) //List(contains(Name, volkswagen), contains(Name, mercedes-benz), contains(Name, ford))
+val bigFilter = carNameFilters.fold(lit(false))((combinedFilter, newCarNameFilter) => combinedFilter or newCarNameFilter) //(((false OR contains(Name, volkswagen)) OR contains(Name, mercedes-benz)) OR contains(Name, ford))
+
+/*
+Complex data types: pyspark
+*/
+val moviesWithReleaseDates = moviesDF
+    .select(col("Title"), to_date(col("Release_Date"), "dd-MMM-yy").as("Actual_Release")) // conversion
+moviesWithReleaseDates
+    .withColumn("Today", current_date()) // today
+    .withColumn("Right_Now", current_timestamp()) // this second
+    .withColumn("Movie_Age", datediff(col("Today"), col("Actual_Release")) / 365) // date_add, date_sub
+
+// Structures
+structureData = [
+    (("James","","Smith"),"36636","M",3100),
+    (("Michael","Rose",""),"40288","M",4300),
+    (("Robert","","Williams"),"42114","M",1400),
+    (("Maria","Anne","Jones"),"39192","F",5500),
+    (("Jen","Mary","Brown"),"","F",-1)
+  ]
+
+structureSchema = StructType([
+        StructField('name', StructType([
+             StructField('firstname', StringType(), True),
+             StructField('middlename', StringType(), True),
+             StructField('lastname', StringType(), True)
+             ])),
+         StructField('id', StringType(), True),
+         StructField('gender', StringType(), True),
+         StructField('salary', IntegerType(), True)
+         ])
+df_struct = spark.createDataFrame(data=structureData,schema=structureSchema)
+df_struct.show(truncate=False)
+/*
+root
+ |-- name: struct (nullable = true)
+ |    |-- firstname: string (nullable = true)
+ |    |-- middlename: string (nullable = true)
+ |    |-- lastname: string (nullable = true)
+ |-- id: string (nullable = true)
+ |-- gender: string (nullable = true)
+ |-- salary: integer (nullable = true)
+
++--------------------+-----+------+------+
+|name                |id   |gender|salary|
++--------------------+-----+------+------+
+|{James, , Smith}    |36636|M     |3100  |
+|{Michael, Rose, }   |40288|M     |4300  |
+|{Robert, , Williams}|42114|M     |1400  |
+|{Maria, Anne, Jones}|39192|F     |5500  |
+|{Jen, Mary, Brown}  |     |F     |-1    |
++--------------------+-----+------+------+
+*/
+
+df_struct.select("name.*", "id","gender","salary").printSchema()
+df_struct_flatten=df_struct.select("name.*", "id","gender","salary")
+
+df_struct_flatten.show(truncate=False)
+
+/*
+root
+ |-- firstname: string (nullable = true)
+ |-- middlename: string (nullable = true)
+ |-- lastname: string (nullable = true)
+ |-- id: string (nullable = true)
+ |-- gender: string (nullable = true)
+ |-- salary: integer (nullable = true)
+
++---------+----------+--------+-----+------+------+
+|firstname|middlename|lastname|id   |gender|salary|
++---------+----------+--------+-----+------+------+
+|James    |          |Smith   |36636|M     |3100  |
+|Michael  |Rose      |        |40288|M     |4300  |
+|Robert   |          |Williams|42114|M     |1400  |
+|Maria    |Anne      |Jones   |39192|F     |5500  |
+|Jen      |Mary      |Brown   |     |F     |-1    |
++---------+----------+--------+-----+------+------+
+*/
+
+// Arrays
+
+df_array = spark.createDataFrame([ \
+    Row(arrayA=[1,2,3,4,5],fieldB="Rory"),Row(arrayA=[888,777,555,999,666],fieldB="Arin")])
+/*
+df_array >>
++--------------------+------+
+|              arrayA|fieldB|
++--------------------+------+
+|     [1, 2, 3, 4, 5]|  Rory|
+|[888, 777, 555, 9...|  Arin|
++--------------------+------+
+*/
+df_finding_in_array = df_array.filter(array_contains(df_array.arrayA,3))
+df_finding_in_array.show()
+/*
++---------------+------+
+|         arrayA|fieldB|
++---------------+------+
+|[1, 2, 3, 4, 5]|  Rory|
++---------------+------+
+*/
+
+df_array.select( \
+        col("arrayA").getItem(0).alias("element0"), \
+        col("arrayA")[4].alias("element5"), \
+        col("fieldB")) \
+    .show()
+/*
++--------+--------+------+
+|element0|element5|fieldB|
++--------+--------+------+
+|       1|       5|  Rory|
+|     888|     666|  Arin|
++--------+--------+------+
+*/
+
+df_nested_arraytype = spark.createDataFrame([
+    Row(
+        arrayA=[
+            Row(childStructB=Row(field1=1, field2="foo")),
+            Row(childStructB=Row(field1=2, field2="bar"))
+        ]
+    )])
+df_nested_arraytype.printSchema()
+
+df_nested_arraytype.show(1, False)
+
+/*
+root
+ |-- arrayA: array (nullable = true)
+ |    |-- element: struct (containsNull = true)
+ |    |    |-- childStructB: struct (nullable = true)
+ |    |    |    |-- field1: long (nullable = true)
+ |    |    |    |-- field2: string (nullable = true)
+
++------------------------+
+|arrayA                  |
++------------------------+
+|[{{1, foo}}, {{2, bar}}]|
++------------------------+
+*/
+
+
+
+'''Printing arrayA, field1 and field2 using dot '''
+df_child = df_nested_arraytype.select(
+        "arrayA.childStructB.field1",
+        "arrayA.childStructB.field2")
+
+df_child.printSchema()
+
+df_child.show()
+/*
+root
+ |-- field1: array (nullable = true)
+ |    |-- element: long (containsNull = true)
+ |-- field2: array (nullable = true)
+ |    |-- element: string (containsNull = true)
+
++------+----------+
+|field1|    field2|
++------+----------+
+|[1, 2]|[foo, bar]|
++------+----------+
+*/
+'''Nested structype within nested arraytype'''
+df_nested_B = spark.createDataFrame([
+    Row(
+        arrayA=[[
+            Row(childStructB=Row(field1=1, field2="foo")),
+            Row(childStructB=Row(field1=2, field2="bar"))
+        ]]
+    )])
+df_nested_B.printSchema()
+df_nested_B.show(1, False)
+/*
+root
+ |-- arrayA: array (nullable = true)
+ |    |-- element: array (containsNull = true)
+ |    |    |-- element: struct (containsNull = true)
+ |    |    |    |-- childStructB: struct (nullable = true)
+ |    |    |    |    |-- field1: long (nullable = true)
+ |    |    |    |    |-- field2: string (nullable = true)
+
++--------------------------+
+|arrayA                    |
++--------------------------+
+|[[{{1, foo}}, {{2, bar}}]]|
++--------------------------+
+*/
+
 
