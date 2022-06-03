@@ -586,3 +586,106 @@ moviesWithWords.select(
     size(col("Title_Words")), // array size
     array_contains(col("Title_Words"), "Love") // look for value in array
   )
+
+
+/*******************************************************************************************************************
+Datasets
+*******************************************************************************************************************/
+
+def readDF(filename: String) = spark.read
+    .option("inferSchema", "true")
+    .json(s"src/main/resources/data/$filename")
+val carsDF = readDF("cars.json")
+/*
+root
+ |-- Acceleration: double (nullable = true)
+ |-- Cylinders: long (nullable = true)
+ |-- Displacement: double (nullable = true)
+ |-- Horsepower: long (nullable = true)
+ |-- Miles_per_Gallon: double (nullable = true)
+ |-- Name: string (nullable = true)
+ |-- Origin: string (nullable = true)
+ |-- Weight_in_lbs: long (nullable = true)
+ |-- Year: string (nullable = true)
++------------+---------+------------+----------+----------------+-------------------------+------+-------------+----------+
+|Acceleration|Cylinders|Displacement|Horsepower|Miles_per_Gallon|Name                     |Origin|Weight_in_lbs|Year      |
++------------+---------+------------+----------+----------------+-------------------------+------+-------------+----------+
+|12.0        |8        |307.0       |130       |18.0            |chevrolet chevelle malibu|USA   |3504         |1970-01-01|
+|11.5        |8        |350.0       |165       |15.0            |buick skylark 320        |USA   |3693         |1970-01-01|
++------------+---------+------------+----------+----------------+-------------------------+------+-------------+----------+
+*/
+
+//making a DataSet
+case class Car(
+                Name: String,
+                Miles_per_Gallon: Option[Double],
+                Cylinders: Long,
+                Displacement: Double,
+                Horsepower: Option[Long],
+                Weight_in_lbs: Long,
+                Acceleration: Double,
+                Year: String,
+                Origin: String
+                )
+import spark.implicits._
+val carsDS = carsDF.as[Car]
+carsDS.show(false)
+carsDS.printSchema()
+/*
+root
+ |-- Acceleration: double (nullable = true)
+ |-- Cylinders: long (nullable = true)
+ |-- Displacement: double (nullable = true)
+ |-- Horsepower: long (nullable = true)
+ |-- Miles_per_Gallon: double (nullable = true)
+ |-- Name: string (nullable = true)
+ |-- Origin: string (nullable = true)
+ |-- Weight_in_lbs: long (nullable = true)
+ |-- Year: string (nullable = true)
++------------+---------+------------+----------+----------------+-------------------------+------+-------------+----------+
+|Acceleration|Cylinders|Displacement|Horsepower|Miles_per_Gallon|Name                     |Origin|Weight_in_lbs|Year      |
++------------+---------+------------+----------+----------------+-------------------------+------+-------------+----------+
+|12.0        |8        |307.0       |130       |18.0            |chevrolet chevelle malibu|USA   |3504         |1970-01-01|
+|11.5        |8        |350.0       |165       |15.0            |buick skylark 320        |USA   |3693         |1970-01-01|
++------------+---------+------------+----------+----------------+-------------------------+------+-------------+----------+
+*/
+//With Datasets you could use RDD functions, like comprehensions
+// map, flatMap, fold, reduce, for comprehensions ...
+val carNamesDS = carsDS.map(car => car.Name.toUpperCase())
+carNamesDS.show(false)
+carNamesDS.printSchema()
+/*
++-------------------------+
+|value                    |
++-------------------------+
+|CHEVROLET CHEVELLE MALIBU|
+|BUICK SKYLARK 320        |
++-------------------------+
+only showing top 2 rows
+
+root
+ |-- value: string (nullable = true)
+*/
+
+/**
+* Exercises
+*
+* 1. Count how many cars we have: val carsCount = carsDS.count
+* 2. Count how many POWERFUL cars we have (HP > 140): arsDS.filter(_.Horsepower.getOrElse(0L) > 140).count
+* 3. Average HP for the entire dataset: 
+    3.1 carsDS.map(_.Horsepower.getOrElse(0L)).reduce(_ + _) / carsCount
+    3.2 carsDS.select(avg(col("Horsepower")))
+*/
+case class Guitar(id: Long, make: String, model: String, guitarType: String)
+case class GuitarPlayer(id: Long, name: String, guitars: Seq[Long], band: Long)
+case class Band(id: Long, name: String, hometown: String, year: Long)
+val guitarsDS = readDF("guitars.json").as[Guitar]
+val guitarPlayersDS = readDF("guitarPlayers.json").as[GuitarPlayer]
+val bandsDS = readDF("bands.json").as[Band]
+val guitarPlayerBandsDS: Dataset[(GuitarPlayer, Band)] = guitarPlayersDS.joinWith(bandsDS, guitarPlayersDS.col("band") === bandsDS.col("id"), "inner")
+val carsGroupedByOrigin = carsDS
+    .groupByKey(_.Origin)
+    .count()
+    .show()
+
+
