@@ -80,6 +80,17 @@ val employeesDF = spark.read
     .option("dbtable", "public.employees")
     .load()
 
+//Reading dB executing query
+val query = "(SELECT * FROM public.employees) tmp"
+val employeesDF = spark.read
+    .format("jdbc")
+    .option("driver", driver) // 
+    .option("url", url)
+    .option("user", user)
+    .option("password", password)
+    .option("dbtable", "public.employees")
+    .load()
+
 /*
 Read dates with custom format type
 */
