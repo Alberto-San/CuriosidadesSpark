@@ -1,6 +1,6 @@
-/*
+/******************************************************************************************************************
 Create DataFrame from RDD with a schema
-*/
+******************************************************************************************************************/
 
 val someData = Seq(
   Row(8, "bat"),
@@ -19,9 +19,9 @@ val someDF = spark.createDataFrame(
 )
 
 
-/*
+/*******************************************************************************************************************
 Create DataFrame with Columns with infered schema
-*/
+*******************************************************************************************************************/
 
 val cars = Seq(
     ("chevrolet chevelle malibu",18,8,307,130,3504,12.0,"1970-01-01","USA"),
@@ -40,9 +40,9 @@ val cars = Seq(
  val manualCarsDFWithImplicits = cars.toDF("Name", "MPG", "Cylinders", "Displacement", "HP", "Weight", "Acceleration", "Year", "CountryOrigin")
  
  
- /*
+ /*******************************************************************************************************************
  Declare an spark object for execution
- */
+ *******************************************************************************************************************/
 import org.apache.spark.sql.{Row, SparkSession}
 import org.apache.spark.sql.types._
 object DataFramesBasics extends App {
@@ -111,9 +111,9 @@ spark.read
     .csv("src/main/resources/data/stocks.csv")
 
 
-/*
+/*******************************************************************************************************************
 Columns and expressions
-*/
+*******************************************************************************************************************/
 
 // various select methods
 import spark.implicits._
@@ -141,9 +141,9 @@ carsWithColumnRenamed.drop("Cylinders", "Displacement")
 
 
 
-/*
+/*******************************************************************************************************************
 Aggregations
-*/
+*******************************************************************************************************************/
 
 // counting
 val genresCountDF = moviesDF.select(count(col("Major_Genre"))) // all the values except null
@@ -178,9 +178,9 @@ moviesDF
     )
     .orderBy(col("Avg_Rating").desc_nulls_last)
 
-/*
+/*******************************************************************************************************************
 join types
-*/
+*******************************************************************************************************************/
 val guitaristsBandsDF = guitaristsDF.join(bandsDF, joinCondition, "inner")
 guitaristsDF.join(bandsDF, joinCondition, "left_outer") // left outer = everything in the inner join + all the rows in the LEFT table, with nulls in where the data is missing
 guitaristsDF.join(bandsDF, joinCondition, "right_outer") // right outer = everything in the inner join + all the rows in the RIGHT table, with nulls in where the data is missing
@@ -191,9 +191,9 @@ guitaristsDF.join(bandsModDF, guitaristsDF.col("band") === bandsModDF.col("bandI
 guitaristsDF.join(guitarsDF.withColumnRenamed("id", "guitarId"), expr("array_contains(guitars, guitarId)")) // using complex types
 
 
-/*
+/*******************************************************************************************************************
 Common Types: Boilerplate
-*/
+*******************************************************************************************************************/
 // correlation = number between -1 and 1
 println(moviesDF.stat.corr("Rotten_Tomatoes_Rating", "IMDB_Rating") /* corr is an ACTION */)
 carsDF.select(initcap(col("Name"))) // capitalization: initcap, lower, upper
@@ -206,9 +206,9 @@ def getCarNames: List[String] = List("Volkswagen", "Mercedes-Benz", "Ford")
 val carNameFilters = getCarNames.map(_.toLowerCase()).map(name => col("Name").contains(name)) //List(contains(Name, volkswagen), contains(Name, mercedes-benz), contains(Name, ford))
 val bigFilter = carNameFilters.fold(lit(false))((combinedFilter, newCarNameFilter) => combinedFilter or newCarNameFilter) //(((false OR contains(Name, volkswagen)) OR contains(Name, mercedes-benz)) OR contains(Name, ford))
 
-/*
+/*******************************************************************************************************************
 Complex data types: pyspark
-*/
+*******************************************************************************************************************/
 val moviesWithReleaseDates = moviesDF
     .select(col("Title"), to_date(col("Release_Date"), "dd-MMM-yy").as("Actual_Release")) // conversion
 moviesWithReleaseDates
