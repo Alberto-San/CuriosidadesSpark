@@ -687,5 +687,5 @@ val carsGroupedByOrigin = carsDS
     .groupByKey(_.Origin)
     .count()
     .show()
-
+carsGroupedByOrigin.select(col("Name").as[String]).collect()
 
