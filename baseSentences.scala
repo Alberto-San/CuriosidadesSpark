@@ -695,3 +695,120 @@ val carsGroupedByOrigin = carsDS
     .show()
 carsGroupedByOrigin.select(col("Name").as[String]).collect()
 
+
+/*******************************************************************************************************************
+Managing Nulls
+*******************************************************************************************************************/
+// select the first non-null value
+moviesDF.select(
+    col("Title"),
+    col("Rotten_Tomatoes_Rating"),
+    col("IMDB_Rating"),
+    coalesce(col("Rotten_Tomatoes_Rating"), col("IMDB_Rating") * 10)
+  )
+
+
+moviesDF.select("*").where(col("Rotten_Tomatoes_Rating").isNull) // checking for nulls
+moviesDF.orderBy(col("IMDB_Rating").desc_nulls_last) // nulls when ordering
+moviesDF.select("Title", "IMDB_Rating").na.drop() // remove rows containing nulls
+moviesDF.na.fill(0, List("IMDB_Rating", "Rotten_Tomatoes_Rating")) // replace nulls
+moviesDF.na.fill(Map(
+    "IMDB_Rating" -> 0,
+    "Rotten_Tomatoes_Rating" -> 10,
+    "Director" -> "Unknown"
+  ))  // replace nulls 
+
+moviesDF.selectExpr(
+    "Title",
+    "IMDB_Rating",
+    "Rotten_Tomatoes_Rating",
+    "ifnull(Rotten_Tomatoes_Rating, IMDB_Rating * 10) as ifnull", // same as coalesce
+    "nvl(Rotten_Tomatoes_Rating, IMDB_Rating * 10) as nvl", // same
+    "nullif(Rotten_Tomatoes_Rating, IMDB_Rating * 10) as nullif", // returns null if the two values are EQUAL, else first value
+    "nvl2(Rotten_Tomatoes_Rating, IMDB_Rating * 10, 0.0) as nvl2" // if (first != null) second else third
+  ).show() // replace nulls 
+
+/*******************************************************************************************************************
+RDDs
+*******************************************************************************************************************/
+val sc = spark.sparkContext
+// 1 - parallelize an existing collection
+val numbers = 1 to 1000000
+val numbersRDD = sc.parallelize(numbers) // RDD of numbers [1,..., 1000000]
+
+// 2 - reading from files
+case class StockValue(symbol: String, date: String, price: Double)
+def readStocks(filename: String) =
+    Source
+      .fromFile(filename) //instanciate file
+      .getLines() // read lines
+      .drop(1) // drop header
+      .map(line => line.split(",")) // string => Array(...)
+      .map(tokens => StockValue(tokens(0), tokens(1), tokens(2).toDouble)) List[String] => Array[StockValue[String]]
+      .toList
+val filename = "src/main/resources/data/stocks.csv"
+val fileContentCollection = readStocks(filename)
+val stocksRDD = sc.parallelize(fileContentCollection)
+/*
+>>stocksRDD.take(5).foreach(println)
+StockValue(MSFT,Jan 1 2000,39.81)
+StockValue(MSFT,Feb 1 2000,36.35)
+...
+*/
+
+// 2b - reading from files
+val stocksRDD2 = sc.textFile(filename)
+    .map(line => line.split(","))
+    .filter(tokens => tokens(0).toUpperCase() == tokens(0))
+    .map(tokens => StockValue(tokens(0), tokens(1), tokens(2).toDouble))
+/*
+>>stocksRDD2.take(5).foreach(println)
+StockValue(MSFT,Jan 1 2000,39.81)
+StockValue(MSFT,Feb 1 2000,36.35)
+...
+*/
+
+// 3 - read from a DF
+val stocksDF = spark.read
+  .option("header", "true")
+  .option("inferSchema", "true")
+  .csv("src/main/resources/data/stocks.csv")
+
+import spark.implicits._
+val stocksDS = stocksDF.as[StockValue]
+val stocksRDD3 = stocksDS.rdd
+/*
+>>stocksRDD3.take(5).foreach(println)
+StockValue(MSFT,Jan 1 2000,39.81)
+StockValue(MSFT,Feb 1 2000,36.35)
+...
+*/
+
+// RDD -> DF
+val numbersDF = numbersRDD.toDF("numbers") // you lose the type info
+numbersDF.show(false)
+/*
++-------+
+|numbers|
++-------+
+|1      |
+|2      |
++-------+
+*/
+
+// RDD -> DS
+val numbersDS = spark.createDataset(numbersRDD) // you get to keep type info
+/*
++-----+
+|value|
++-----+
+|1    |
+|2    |
++-----+
+*/
+
+
+
+
+
+
