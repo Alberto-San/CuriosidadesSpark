@@ -729,7 +729,7 @@ moviesDF.selectExpr(
   ).show() // replace nulls 
 
 /*******************************************************************************************************************
-RDDs
+RDDs and Datasets
 *******************************************************************************************************************/
 val sc = spark.sparkContext
 // 1 - parallelize an existing collection
@@ -807,8 +807,75 @@ val numbersDS = spark.createDataset(numbersRDD) // you get to keep type info
 +-----+
 */
 
+// distinct
+val msftRDD = stocksRDD.filter(_.symbol == "MSFT") // lazy transformation
+/*
+StockValue(MSFT,Jan 1 2000,39.81)
+StockValue(MSFT,Feb 1 2000,36.35)
+*/
+val msCount = msftRDD.count() // eager ACTION
 
+val companyNamesRDD = stocksRDD.map(_.symbol).distinct() // also lazy
+/*
+AMZN
+MSFT
+*/
+/*
+min in RDDs requires
+def min()(implicit ord: Ordering[T]): T = withScope {
+    this.reduce(ord.min)
+  }
+*/
+implicit val stockOrdering: Ordering[StockValue] =
+    Ordering.fromLessThan[StockValue](
+      (sa: StockValue, sb: StockValue) => sa.price < sb.price
+    ) // comparing is made using the price value. This is like a reducing function.
+val minMsft = msftRDD.min() // action
+/*
+StockValue(MSFT,Feb 1 2009,15.81)
+*/
 
+// reduce
+println(numbersRDD.reduce(_ + _))
+/*
+1784293664
+*/
+
+// grouping
+val groupedStocksRDD = stocksRDD.groupBy(_.symbol)
+/*
+( AMZN,
+  CompactBuffer(StockValue(AMZN,Jan 1 2000,64.56), ... , StockValue(AMZN,Mar 1 2010,128.82)) )
+( MSFT,
+  CompactBuffer(StockValue(MSFT,Jan 1 2000,39.81), ... , StockValue(MSFT,Mar 1 2010,28.8)) )
+*/
+/*
+  Repartitioning is EXPENSIVE. Involves Shuffling.
+  Best practice: partition EARLY, then process that.
+  Size of a partition 10-100MB.
+  Coalesce instead, does not involved shuffle.
+ */
+
+case class Movie(title: String, genre: String, rating: Double)
+val moviesRDD = moviesDF
+    .select(col("Title").as("title"), col("Major_Genre").as("genre"), col("IMDB_Rating").as("rating"))
+    .where(col("genre").isNotNull and col("rating").isNotNull)
+    .as[Movie]
+    .rdd
+// show the average rating of movies by genre.
+case class GenreAvgRating(genre: String, rating: Double)
+val avgRatingByGenreRDD = moviesRDD.groupBy(_.genre).map {
+    case (genre, movies) => GenreAvgRating(genre, movies.map(_.rating).sum / movies.size)
+  }
+
+/*
++-------------------+------------------+
+|              genre|            rating|
++-------------------+------------------+
+|Concert/Performance|             6.325|
+|            Western| 6.842857142857142|
++-------------------+------------------+
+*/
 
 
 
