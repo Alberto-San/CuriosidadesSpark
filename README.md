@@ -48,3 +48,22 @@ Executors are responsible to run the work assigned, and
 reporting the state of the computation on that executor back to the driver node
 ```
 
+When the driver receives a program:
+```
+val myRange = spark.range(1000).toDF("number")
+```
+It will distribute that load into the multiples executors, which will locaye
+
+<b>Modes</b>
+<ul>
+  <li>
+    <b>Cluster Mode: </b> Spark runs its jobs on different machines on different processes
+  </li>
+  <li>
+    <b>Local Mode: </b> Same machine but different processes.
+  </li>
+</ul>
+
+<b>Note: </b> despite it exists many APIs (Java, Scala, Python, R, ...), the spark code its translate into JVM code, and each executor, run JVM parts of the code. SparkSession is the entrypoint for that, receives Java, Scala, Python, R code, and translate that into JVM instructions that runs in each executor having a cluster architecture.
+
+
