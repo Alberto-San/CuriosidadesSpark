@@ -1,5 +1,5 @@
 # Table of contents
-1. [Basics] (#basics)
+1. [Basics](#basics)
 2. [What is a STAGE?](#stage)
 3. [What is a TASK?] (#task)
 4. [What is a JOB?] (#job)
