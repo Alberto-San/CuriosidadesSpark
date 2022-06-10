@@ -6,7 +6,7 @@
 5. [Example] (#example)
 6. [Transformations] (#transformations)
 7. [Actions] (#actions)
-8. [Driver] (#driver)
+8. [Driver and Executors](#driver)
 9. [Spark Architecture] (#architecture)
 10. [Spark Optimizations] (#optimizations)
 
@@ -37,4 +37,14 @@ A set of Stages are known as Jobs. But when an action happens, a job is broken. 
 df.write.format(...).save(...)
 ```
 
-  
+# Driver and Executors <a name="driver"></a>
+This process as a centralized metadata and the boss aplication, that orders spark executors (slave) to run some amount of work. Driver is responsible for
+```
+maintaining information about the Spark Application; responding to a user’s program or input;
+and analyzing, distributing, and scheduling work across the executors
+```
+Executors are responsible to run the work assigned, and 
+```
+reporting the state of the computation on that executor back to the driver node
+```
+
