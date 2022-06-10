@@ -37,10 +37,4 @@ A set of Stages are known as Jobs. But when an action happens, a job is broken. 
 df.write.format(...).save(...)
 ```
 
-# What is a STAGE? <a name="stage"></a>
-  * a. Go to DISKPART in windows
-  * b. type ```list disk``` and ```select $DISK```, where DISK y the disk label of your current USB device.
-  * c. type ```create partition primary```
-  * d. type ```clean```
-  * e. Format the disk from Disk Management UI. 
   
