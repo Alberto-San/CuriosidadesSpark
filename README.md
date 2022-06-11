@@ -80,8 +80,20 @@ One partition means no parallel computing
 Multiple partitions and one computer, means no parallelism.
 
 # Transformations
-<b>NARROW: </b> 1 to 1 (map, filter). With this ops, spark performs an operation called ```pipelining```, which performs ops in mem.
-<b>WIDE: </b> many to one, many to many, not 1 to 1. Involves shuffle operations (all aggregations, join). When perform a shuffle, spark writes data to disk.
+<b>NARROW: </b> 1 to 1 (map, filter, union, sample, read). With this ops, spark performs an operation called ```pipelining```, which performs ops in mem.
+<b>WIDE: </b> many to one, many to many, not 1 to 1. Involves shuffle operations (all aggregations, join, repartition, coalesce, sort). When perform a shuffle, spark writes data to disk.
 Tranformations are lazy, they are not applied until an action is executed.
+Lazy evaluation leads to make an execution plan, which will be optimized by spark. Transformations just help to build the logical plan.
+
+# Actions
+Action trigguer the computation of the logical plan. There are 3 kids:
+* Actions to view data in console
+* Actions to collect data into native objects
+* Actions to write data
+
+Examples: write, count (without aggregation), show, collect, countByValue, reduce, fold, aggregate, foreach.
+
+
+
 
 
