@@ -9,6 +9,7 @@
 8. [Driver and Executors](#driver)
 9. [Spark Architecture] (#architecture)
 10. [Spark Optimizations] (#optimizations)
+11. [Spark APIs](#apis)
 
 # Basics <a name="basics"></a>
 Think on a DF as a high level API, that is builded on top of RDDs.
@@ -65,5 +66,22 @@ It will distribute that load into the multiples executors, which will locaye
 </ul>
 
 <b>Note: </b> despite it exists many APIs (Java, Scala, Python, R, ...), the spark code its translate into JVM code, and each executor, run JVM parts of the code. SparkSession is the entrypoint for that, receives Java, Scala, Python, R code, and translate that into JVM instructions that runs in each executor having a cluster architecture.
+
+
+# Spark API's (RDDs, DataFrames, Datasets, SQL Tables)<a name="apis"></a>
+Spark API's are composed of unstructure APIs (RDDs), and structure APIs (DF, DS).
+
+# Dataframes
+rows with schema. Data is located in multiple machines.
+
+# Partitions
+Spark breaks data into chunks called partitions. A partition if a collection of rows store in machines. 
+One partition means no parallel computing
+Multiple partitions and one computer, means no parallelism.
+
+# Transformations
+<b>NARROW: </b> 1 to 1 (map, filter). With this ops, spark performs an operation called ```pipelining```, which performs ops in mem.
+<b>WIDE: </b> many to one, many to many, not 1 to 1. Involves shuffle operations (all aggregations, join). When perform a shuffle, spark writes data to disk.
+Tranformations are lazy, they are not applied until an action is executed.
 
 
