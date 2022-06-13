@@ -136,6 +136,16 @@ val dataFrameWay = flightData2015
 Always think in terms of <b>DAG transformations</b>. 
 
 # Datasets
-Datasets are type-safe versions. 
-
+Datasets are type-safe versions. Type-safe because you assign Java/Scala class to the records within the DataFrame, and you can manipullate them as collection of typed-objects. You always need a dataframe first, in order to convert it as Dataset. 
+```scala
+case class Flight(
+    DEST_COUNTRY_NAME: String,
+    ORIGIN_COUNTRY_NAME: String,
+    count: BigInt)
+val flights = flightsDF.as[Flight]
+flights
+.take(5)
+.filter(flight_row => flight_row.ORIGIN_COUNTRY_NAME != "Canada")
+.map(fr => Flight(fr.DEST_COUNTRY_NAME, fr.ORIGIN_COUNTRY_NAME, fr.count + 5))
+```
 
