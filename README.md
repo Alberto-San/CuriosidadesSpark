@@ -135,5 +135,7 @@ val dataFrameWay = flightData2015
 
 Always think in terms of <b>DAG transformations</b>. 
 
+# Datasets
+Datasets are type-safe versions. 
 
 
