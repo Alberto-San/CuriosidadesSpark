@@ -93,7 +93,27 @@ Action trigguer the computation of the logical plan. There are 3 kids:
 
 Examples: write, count (without aggregation), show, collect, countByValue, reduce, fold, aggregate, foreach.
 
+# Execution Plan
+The top or the first line of the execution plan, correspond to the end result, and the bottom, to the first operations applied. 
 
+# Shufle
+By default is 200. in order to change this value
+```scala
+spark.conf.set("spark.sql.shuffle.partitions", "5")
+flightData2015.sort("count").take(2) //  Array([United States,Singapore,1], [Moldova,United States,1])
+```
+# DataFrames and SQL
+You can express your business logic in SQL or DataFrames. You can register any dataframe as table or view, and query using pure SQL. 
+There is no performance difference in using SQL/DF, they both compile to the same logical plan.
+```scala
+flightData2015.createOrReplaceTempView("flight_data_2015")
+
+val dataFrameWay = flightData2015
+.groupBy('DEST_COUNTRY_NAME)
+.count()
+```
+
+Always think in terms of <b>DAG transformations</b>. 
 
 
 
