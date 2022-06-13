@@ -7,7 +7,7 @@
 6. [Transformations] (#transformations)
 7. [Actions] (#actions)
 8. [Driver and Executors](#driver)
-9. [Spark Architecture] (#architecture)
+9. [Spark Architecture](#architecture)
 10. [Spark Optimizations] (#optimizations)
 11. [Spark APIs](#apis)
 
@@ -67,6 +67,26 @@ It will distribute that load into the multiples executors, which will locaye
 
 <b>Note: </b> despite it exists many APIs (Java, Scala, Python, R, ...), the spark code its translate into JVM code, and each executor, run JVM parts of the code. SparkSession is the entrypoint for that, receives Java, Scala, Python, R code, and translate that into JVM instructions that runs in each executor having a cluster architecture.
 
+# Spark Architecture<a name="architecture"></a>
+# Spark Submit
+Spark submit command is used to lauch an application. It looks like:
+```shell
+./bin/spark-submit \
+  --class <main-class> \
+  --master <master-url> \
+  --deploy-mode <deploy-mode> \
+  --conf <key>=<value> \
+  ... # other options
+  <application-jar> \
+  [application-arguments]
+```
+Where 
+* ```class```: entrypoint for your application (main class/object: org.apache.spark.examples.SparkPi)
+* ```master```: master url for the cluster (local, local[2], local[*] , spark://23.195.26.187:7077, mesos://$IP:$PORT, yarn, k8s://HOST:PORT). <a href="https://spark.apache.org/docs/latest/submitting-applications.html"> More info </a>
+* ```deploy-mode```: cluster (deploy driver on the worker nodes), client (default, deploy driver locally as an external client).
+* ```conf```: key-value pairs.
+* ```application-jar```: path to the jar with the dependencies (it can be  hdfs://, or file://, but in the second case, the file must be visible for all workers).
+* ```application-arguments```: arguments that the main class is expecting to have.
 
 # Spark API's (RDDs, DataFrames, Datasets, SQL Tables)<a name="apis"></a>
 Spark API's are composed of unstructure APIs (RDDs), and structure APIs (DF, DS).
