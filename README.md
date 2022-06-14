@@ -151,4 +151,11 @@ flights
 
 # Structured Streaming 
 <img src="https://spark.apache.org/docs/latest/img/structured-streaming-example-model.png" width="700" heigh="700">
-
+<img src="https://spark.apache.org/docs/latest/img/structured-streaming-window.png" width="700" heigh="700">
+The image above shows how the input is appended trough the time, and the output also is updated. In streaming, we have different concepts:
+* watermark
+* event time
+* late arrive data
+* process time
+* windows operations
+<a href= "https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html">More information</a>
