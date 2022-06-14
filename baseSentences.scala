@@ -2,6 +2,10 @@
 Create DataFrame from RDD with a schema
 ******************************************************************************************************************/
 
+// in Scala
+val jsonDF = spark.range(1).selectExpr("""
+'{"myJSONKey" : {"myJSONValue" : [1, 2, 3]}}' as jsonString""") //dummy query
+
 val someData = Seq(
   Row(8, "bat"),
   Row(64, "mouse"),
