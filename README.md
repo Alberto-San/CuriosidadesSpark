@@ -4,7 +4,7 @@
 3. [What is a TASK?] (#task)
 4. [What is a JOB?] (#job)
 5. [Example] (#example)
-6. [Transformations] (#transformations)
+6. [Transformations](#transformations)
 7. [Actions] (#actions)
 8. [Driver and Executors](#driver)
 9. [Spark Architecture](#architecture)
