@@ -149,3 +149,6 @@ flights
 .map(fr => Flight(fr.DEST_COUNTRY_NAME, fr.ORIGIN_COUNTRY_NAME, fr.count + 5))
 ```
 
+# Structured Streaming 
+<img src="https://spark.apache.org/docs/latest/img/structured-streaming-example-model.png">
+
