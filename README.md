@@ -68,6 +68,13 @@ It will distribute that load into the multiples executors, which will locaye
 <b>Note: </b> despite it exists many APIs (Java, Scala, Python, R, ...), the spark code its translate into JVM code, and each executor, run JVM parts of the code. SparkSession is the entrypoint for that, receives Java, Scala, Python, R code, and translate that into JVM instructions that runs in each executor having a cluster architecture.
 
 # Spark Architecture<a name="architecture"></a>
+# Steps of executions
+<ol>
+  <li>Write spark code</li>
+  <li>If the code is OK, then is compiled into a logical plan</li>
+  <li>With some plan optimizations (Catalyst Optimizer), logical turns into a physical plan</li>
+  <li>Spark executes Physical plan (rdd manipulations, yes, everything is executed in terms of rdd) on the cluster</li>
+</ol>
 # Spark Submit
 Spark submit command is used to lauch an application. It looks like:
 ```shell
