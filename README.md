@@ -150,5 +150,5 @@ flights
 ```
 
 # Structured Streaming 
-<img src="https://spark.apache.org/docs/latest/img/structured-streaming-example-model.png" width="500" heigh="500">
+<img src="https://spark.apache.org/docs/latest/img/structured-streaming-example-model.png" width="700" heigh="700">
 
