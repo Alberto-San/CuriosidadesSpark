@@ -139,7 +139,7 @@ val carsWithColumnRenamed = carsDF.withColumnRenamed("Weight_in_lbs", "Weight in
 val carsWithKg3DF = carsDF.withColumn("Weight_in_kg_3", col("Weight_in_lbs") / 2.2)
 carsWithColumnRenamed.drop("Cylinders", "Displacement")
 
-
+df.where(col("Description").eqNullSafe("hello")).show() //null safe comparison
 
 /*******************************************************************************************************************
 Aggregations
