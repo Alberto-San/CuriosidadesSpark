@@ -44,7 +44,8 @@ Consider 5 clients that wants to whash and dry their clothes.
 Consider time to achieve: washer (10 min), drier (5 min)
 
 We can create virtual parallelism if we use both machines at the same time
-tasks:  
+tasks:
+```
 [0-10 min]
 +------+--------+-------+
 | task | washer | drier |
@@ -83,6 +84,7 @@ tasks:
 +------+--------+-------+
 |  3   |  X     | NA    |
 +------+--------+-------+
+```
 
 in this case, if we have map, filter and map operations, the task will be each record, the map, filter, and map ops will be steps that could be applied in a virtual parallel way.
 
