@@ -73,6 +73,20 @@ It will distribute that load into the multiples executors, which will locate
 
 # Spark Architecture<a name="architecture"></a>
 
+# Basic componentes
+<ul>
+  <li>
+    <b>Spark Driver</b>: controller of the execution of the spark app. Mantains the state of the spark cluster manager (boss). Communicates with the boss to reserv resources. Basically is a client that request information of its product to the boss.
+  </li>
+  <li>
+    <b>Spark Executors</b>: execute task assigned by the driver, run them, and report state. 
+  </li>
+  <li>
+    <b>Cluster Manager</b>: mantains a cluster of machines. Boss mantains its driver process, each executor has its own process to communicate with the boss. Cluster supported: YARN, Mesos, Standalone. 
+  </li>
+  
+</ul>
+
 # Steps of executions
 <ol>
   <li>Write spark code</li>
@@ -80,6 +94,16 @@ It will distribute that load into the multiples executors, which will locate
   <li>With some plan optimizations (Catalyst Optimizer), logical turns into a physical plan</li>
   <li>Spark executes Physical plan (rdd manipulations, yes, everything is executed in terms of rdd) on the cluster</li>
 </ol>
+
+# Processes
+
+<ul>
+  <li>Driver Process</li>
+  <li>Application Process</li>
+  <li>Executor Processes</li>
+  <li>Cluster Manager Process</li>
+  <li>Worker Processes</li>
+</ul>
 
 # Spark Submit
 Spark submit command is used to lauch an application. It looks like:
@@ -98,10 +122,20 @@ Spark submit command is used to lauch an application. It looks like:
 Where 
 * ```class```: entrypoint for your application (main class/object: org.apache.spark.examples.SparkPi)
 * ```master```: master url for the cluster (local, local[2], local[*] , spark://23.195.26.187:7077, mesos://$IP:$PORT, yarn, k8s://HOST:PORT). <a href="https://spark.apache.org/docs/latest/submitting-applications.html"> More info </a>
-* ```deploy-mode```: cluster (deploy driver on the worker nodes), client (default, deploy driver locally as an external client).
+* ```deploy-mode```: cluster (deploy driver on the worker nodes, jar is submitted to the boss {cluster manager}, boss manages all application state), client (default, deploy driver locally as an external client, CM just mantains executor processes), local (spark app runs in just one machine).
 * ```conf```: key-value pairs.
 * ```application-jar```: path to the jar with the dependencies (it can be  hdfs://, or file://, but in the second case, the file must be visible for all workers).
 * ```application-arguments```: arguments that the main class is expecting to have.
+
+# Spark Lifecicle app Client Mode Example
+<ol>
+  <li>Client Req</li>: create driver process on one machine of the cluster that will act as client (latency is less is we consider data and network locality).
+  <li>Launch</li>: client cluster machine ask to boss (cluster manager) to get executors process across the cluster. 
+  <li>Execution</li> driver client cluster machine and workers communicates between each other, executing code and moving data, and workers report status. 
+  <li>Completion</li> when completion, boss shut down executors. By asking cluster manager for the app information, you can see if success or failure. 
+</ol>
+
+<b>Note:</b> unless you configure threading, spark jobs are executed serially, and one application can have one or multiple jobs.
 
 # Spark API's (RDDs, DataFrames, Datasets, SQL Tables)<a name="apis"></a>
 Spark API's are composed of unstructure APIs (RDDs), and structure APIs (DF, DS).
