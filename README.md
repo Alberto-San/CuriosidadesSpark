@@ -25,7 +25,7 @@ This is commonly done, when whatever aggregate operation happends.
 
 <b>Shuffle: </b> Shuffle is important, normally is recommended to have 128MB multiple partitions in other to have a good computational load, 
 less shuffle means bigger partitions, and viceversa. Shuffle implies Disk IO, serialization/deserialization, Network IO. Shuffle is not good or bad, normally
-the workflow will decide the conditions of the problem. An example of a stage
+the workflow will decide the conditions of the problem. Shuffle writes data to storage. An example of a stage. 
 
 ```
 df = df.groupBy(key1).agg(sum(key2))
@@ -37,6 +37,56 @@ A set of Stages are known as Jobs. But when an action happens, a job is broken. 
 ```
 df.write.format(...).save(...)
 ```
+<b>Pipelining: </b> 
+
+Considering 2 resources: washer and drier.
+Consider 5 clients that wants to whash and dry their clothes.
+Consider time to achieve: washer (10 min), drier (5 min)
+
+We can create virtual parallelism if we use both machines at the same time
+tasks:  
+[0-10 min]
++------+--------+-------+
+| task | washer | drier |
++------+--------+-------+
+|  1   | X      | NA    |
++------+--------+-------+
+
+[10-15 min]
+
++------+--------+-------+
+| task | washer | drier |
++------+--------+-------+
+|  1   |  NA    | X     |
++------+--------+-------+
+|  2   |  X     | NA    |
++------+--------+-------+
+
+[15-20 min]
+
++------+--------+-------+
+| task | washer | drier |
++------+--------+-------+
+|  1   |  NA    | NA    |
++------+--------+-------+
+|  2   |  X     | NA    |
++------+--------+-------+
+
+[20-25 min] (look that the drier and washer are being used at the same time, virtual parallelism despite the steps are sequential).
+
++------+--------+-------+
+| task | washer | drier |
++------+--------+-------+
+|  1   |  NA    | NA    |
++------+--------+-------+
+|  2   |  NA    | X     |
++------+--------+-------+
+|  3   |  X     | NA    |
++------+--------+-------+
+
+in this case, if we have map, filter and map operations, the task will be each record, the map, filter, and map ops will be steps that could be applied in a virtual parallel way.
+
+An stage contains multiple pipeline tasks.
 
 # Driver and Executors <a name="driver"></a>
 This process as a centralized metadata and the boss aplication, that orders spark executors (slave) to run some amount of work. Driver is responsible for
