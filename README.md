@@ -62,10 +62,10 @@ It will distribute that load into the multiples executors, which will locate
 <b>Modes</b>
 <ul>
   <li>
-    <b>Cluster Mode: </b> Spark runs its jobs on different machines on different processes
+    <b>Cluster Mode:</b> Spark runs its jobs on different machines on different processes
   </li>
   <li>
-    <b>Local Mode: </b> Same machine but different processes.
+    <b>Local Mode:</b> Same machine but different processes.
   </li>
 </ul>
 
