@@ -40,20 +40,24 @@ df.write.format(...).save(...)
 
 # Driver and Executors <a name="driver"></a>
 This process as a centralized metadata and the boss aplication, that orders spark executors (slave) to run some amount of work. Driver is responsible for
+
 ```
 maintaining information about the Spark Application; responding to a user’s program or input;
 and analyzing, distributing, and scheduling work across the executors
 ```
 Executors are responsible to run the work assigned, and 
+
 ```
 reporting the state of the computation on that executor back to the driver node
 ```
 
 When the driver receives a program:
+
 ```
 val myRange = spark.range(1000).toDF("number")
 ```
-It will distribute that load into the multiples executors, which will locaye
+
+It will distribute that load into the multiples executors, which will locate
 
 <b>Modes</b>
 <ul>
@@ -68,6 +72,7 @@ It will distribute that load into the multiples executors, which will locaye
 <b>Note: </b> despite it exists many APIs (Java, Scala, Python, R, ...), the spark code its translate into JVM code, and each executor, run JVM parts of the code. SparkSession is the entrypoint for that, receives Java, Scala, Python, R code, and translate that into JVM instructions that runs in each executor having a cluster architecture.
 
 # Spark Architecture<a name="architecture"></a>
+
 # Steps of executions
 <ol>
   <li>Write spark code</li>
@@ -75,9 +80,11 @@ It will distribute that load into the multiples executors, which will locaye
   <li>With some plan optimizations (Catalyst Optimizer), logical turns into a physical plan</li>
   <li>Spark executes Physical plan (rdd manipulations, yes, everything is executed in terms of rdd) on the cluster</li>
 </ol>
+
 # Spark Submit
 Spark submit command is used to lauch an application. It looks like:
-```shell
+
+```
 ./bin/spark-submit \
   --class <main-class> \
   --master <master-url> \
@@ -87,6 +94,7 @@ Spark submit command is used to lauch an application. It looks like:
   <application-jar> \
   [application-arguments]
 ```
+
 Where 
 * ```class```: entrypoint for your application (main class/object: org.apache.spark.examples.SparkPi)
 * ```master```: master url for the cluster (local, local[2], local[*] , spark://23.195.26.187:7077, mesos://$IP:$PORT, yarn, k8s://HOST:PORT). <a href="https://spark.apache.org/docs/latest/submitting-applications.html"> More info </a>
