@@ -272,3 +272,24 @@ The image above shows how the input is appended trough the time, and the output 
 
 # How to read the Spark UI and Spark query based on Job 
 <img src="https://drive.google.com/uc?export=view&id=1mm6wSfwiBaiFAy3jkEdjfIZmABZzHQp3" width="700" heigh="700">
+
+# Common Issues
+<ol>
+  <li>
+    <b>Errors During Execution: </b>
+    <ul>
+      <li>Some jobs fails (check mispelled columns in a query)</li>
+      <li>Jobs that was ok are failing today [check input data (schema, file)]</li>
+      <li>Slow tasks (try increase number of partitions, or repartition by another combination of columns that prevents skew partitions, increase mem)</li>
+      <li>If you are using Datasets, look at garbage collector metrics in Spark UI to see if its related with slow tasks</li>
+    </ul>
+  </li>
+  <li>
+    <b>Slow Tasks or Stragglers: </b> <br> maybe data is not being evenly distributed in the executors (skew). Slow tasks are often called “stragglers.”
+    <ul>
+      <li>Scaling up the number of machines given to the Spark Application doesn’t really help</li>
+      <li> certain executors are reading and writing much more data than others </li>
+      <li>Possible scenario: in a groupByKey operation, one of the key may have more data than the others (shuffle will be larger for some nodes)</li>
+    </ul>
+  </li>
+</ol>
