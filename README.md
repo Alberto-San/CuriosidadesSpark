@@ -271,4 +271,4 @@ The image above shows how the input is appended trough the time, and the output 
 # Spark Optimizations <a name="optimizations"></a>
 
 # How to read the Spark UI and Spark query based on Job 
-<img src="https://drive.google.com/file/d/1mm6wSfwiBaiFAy3jkEdjfIZmABZzHQp3/view?usp=sharing" width="700" heigh="700">
+<img src="https://drive.google.com/uc?export=view&id=1mm6wSfwiBaiFAy3jkEdjfIZmABZzHQp3" width="700" heigh="700">
