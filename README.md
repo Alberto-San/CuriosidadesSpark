@@ -296,13 +296,13 @@ The image above shows how the input is appended trough the time, and the output 
     <b>Slow Aggregations</b>
     <ul>
       <li>Slow tasks during a groupBy call (increase number of partitions prior to aggregation, ensure just consider fields that needs to be aggregated with select)</li>
-      <li>Jobs after the aggregation are slow (dataset could ended aggregate unbalance data (skew), repartition randomly, partitioning before join may help, but that comes at a shuffle cost. If you have data skew, just increase executors if you can, ensure just consider the important fields for the join, ensure consider nulls) </li>
+      <li>Jobs after the aggregation are slow (dataset could ended aggregate unbalance data (skew), repartition randomly) </li>
     </ul>
   </li>
   <li>
     <b>Slow Joins</b>
     <ul>
-      <li>Join take long time (many joins can be optimized in other kind of simpler joins) </li>
+      <li>Join take long time (many joins can be optimized in other kind of simpler joins, partitioning before join may help, but that comes at a shuffle cost. If you have data skew, just increase executors if you can, ensure just consider the important fields for the join, ensure consider null) </li>
     </ul>
   </li>
 </ol>
