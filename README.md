@@ -281,7 +281,6 @@ The image above shows how the input is appended trough the time, and the output 
       <li>Some jobs fails (check mispelled columns in a query)</li>
       <li>Jobs that was ok are failing today [check input data (schema, file)]</li>
       <li>Slow tasks (try increase number of partitions, or repartition by another combination of columns that prevents skew partitions, increase mem)</li>
-      <li>If you are using Datasets, look at garbage collector metrics in Spark UI to see if its related with slow tasks</li>
     </ul>
   </li>
   <li>
@@ -290,6 +289,22 @@ The image above shows how the input is appended trough the time, and the output 
       <li>Scaling up the number of machines given to the Spark Application doesn’t really help</li>
       <li> certain executors are reading and writing much more data than others </li>
       <li>Possible scenario: in a groupByKey operation, one of the key may have more data than the others (shuffle will be larger for some nodes)</li>
+      <li>If you are using Datasets, look at garbage collector metrics in Spark UI to see if its related with slow tasks</li>
+    </ul>
+  </li>
+  <li>
+    <b>Slow Aggregations</b>
+    <ul>
+      <li>Slow tasks during a groupBy call (increase number of partitions prior to aggregation, ensure just consider fields that needs to be aggregated with select)</li>
+      <li>Jobs after the aggregation are slow (dataset could ended aggregate unbalance data (skew), repartition randomly, partitioning before join may help, but that comes at a shuffle cost. If you have data skew, just increase executors if you can, ensure just consider the important fields for the join, ensure consider nulls) </li>
+    </ul>
+  </li>
+  <li>
+    <b>Slow Joins</b>
+    <ul>
+      <li>Join take long time (many joins can be optimized in other kind of simpler joins) </li>
     </ul>
   </li>
 </ol>
+
+<b>Note: </b> Ensure null values are represented correctly, not with a default value. Spark often optimized for skypping nulls. 
