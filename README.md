@@ -8,8 +8,10 @@
 7. [Actions] (#actions)
 8. [Driver and Executors](#driver)
 9. [Spark Architecture](#architecture)
-10. [Spark Optimizations] (#optimizations)
+10. [Spark Optimizations](#optimizations)
 11. [Spark APIs](#apis)
+
+
 
 # Basics <a name="basics"></a>
 Think on a DF as a high level API, that is builded on top of RDDs.
@@ -263,3 +265,10 @@ The image above shows how the input is appended trough the time, and the output 
   <li>windows operations</li>
 </ul>
 <a href= "https://spark.apache.org/docs/latest/structured-streaming-programming-guide.html">More information</a>
+
+
+
+# Spark Optimizations
+
+# How to read the Spark UI and Spark query based on Job <a name="architecture"></a>
+<img src="https://drive.google.com/file/d/1mm6wSfwiBaiFAy3jkEdjfIZmABZzHQp3/view?usp=sharing" width="700" heigh="700">
