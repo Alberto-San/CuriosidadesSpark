@@ -5,13 +5,18 @@
 4. [What is a JOB?] (#job)
 5. [Example] (#example)
 6. [Transformations](#transformations)
-7. [Actions] (#actions)
+7. [Low Level API: RDD](#rdd)
 8. [Driver and Executors](#driver)
 9. [Spark Architecture](#architecture)
 10. [Spark Optimizations](#optimizations)
 11. [Spark APIs](#apis)
 
 
+# Low Level API <a name="rdd"></a>
+# Transformations
+distinct, filter, map, flatMap, sort, random split
+# Actions
+reduce, count, countApprox, countApproxDistinct, countByValue, countByValueAprox, first, max and min, take.
 
 # Basics <a name="basics"></a>
 Think on a DF as a high level API, that is builded on top of RDDs.
