@@ -15,7 +15,7 @@ runs the task assigned by the Spark driver, and report back their state and the 
 
 # Executions modes
 1. cluster: the spark driver is launched on a worker node. (remember, there is a driver manager process, that is different than the driver of the application). The cluster manager is responsible for Spark Processes.
-
+```
        Cluster Manager Driver
               |
   ----------------------------------
@@ -24,9 +24,9 @@ runs the task assigned by the Spark driver, and report back their state and the 
   |               |                 |
   Spark Driver    Spark Executor   Spark Ex Process
                    Process
-
+```
 3. client: the spark driver is on a client machine. Executors reports state to the client machine driver.
-
+```
 client machine-----------------> Cluster Manager Driver
                                             |
                                  -----------------------
@@ -34,7 +34,6 @@ client machine-----------------> Cluster Manager Driver
                                  WK         WK         WK
                                  |          |          |
                                EX PR      EX PR       EX PR
-
+```
 5. local: the entire application runs in the same machine.
-
-
+6. Example: ```./bin/spark-submit --class part6practical.TestDeployApp --deploy-mode client --master spark://04df43098382:7077 --verbose --supervise /opt/spark-apps/spark-essentials.jar /opt/spark-data/movies.json /opt/spark-data/goodComedies```
