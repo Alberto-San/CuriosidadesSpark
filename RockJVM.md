@@ -65,6 +65,7 @@ DataFrame----
 ## Physical Plan Terminology:
 Plan: Read from bottom to top.
 Exchange: it happends when repartition. It could be round robin partition. In the exchange physical plan operation its shown the exhanged column. 
+SerializeFromObject: takes a big amount of time. Every single element needs to be evaluated individually. The convertion between rdd and df trigguer this task.
 Number of tasks: Number of partitions produced in each stages.
 
 
@@ -93,3 +94,54 @@ sum.explain()
                                                  Exchange RoundRobinPartitioning(9), false, [id=#89]
                                                         (4) Range (1, 10000000, step=2, splits=6)
 ```
+
+## RDDs vs DATAFRAMES vs Datasets
+
+```scala
+val rdd = sc.parallelize(1, 1000000000)
+rdd.count
+import spark.implicits._
+val df = rdd.toDF("id") // performance heat
+df.count
+df.selectExpr("count(*)").show() //count(*) and count() it should took the same amount of time
+val ds = spark.range(1, 1000000000)
+ds.count // faster operations than df. The amount of data shuffle is fast, because the transformation between rdd to df trigguer serializefromobject task. 
+ds.selectExpr("count(*)").show() // faster operation than df
+df.explain
+>>Physical plan
+       (1) Project
+              (1) SerializeFrombject ....
+              ...
+ val rddTimes5 = rdd.map(_*5)
+ rddTimes5.count
+ val dfTimes5 = df.selectExpr("id * 5 as id")
+ dfTimes5.count // takes almost the same time as rddTimes5
+ dfTimes5.explain
+ >> Physical Plan
+       (1) Project [(value * 5) as id]
+              (1) SerializeFromObject [input[0, int, false] as value]
+                     Scan[obj]
+val dfTimes5Count = dfTimes5.selectExpr("count(*)")
+dfTimes5Count.explain // the same that df.count, its the same amount of time, because the multiplication by 5 does matter when executing counting.
+val dsTimes5 = ds.map(_*5)
+val dsTimes5Count = dsTimes5.selectExpr("count(*)")
+val dsCount = ds.selectExpr("count(*)")
+dsCount.explain
+>> Physical Plan
+(2) HashAggregate(keys=[], functions=[count(1)])
+       Exchange SinglePartition, true, [id=#253]
+              (1) HashAggregate (keys=[], functions=[partial_count(1)])
+                     (1) Project
+                            (1) Range(1, 1000000000, step=1, splits=6)
+ dsTimes5Count.explain
+ >> Physical Plan
+ (2) HashAggregate(keys=[], functions=[count(1)])
+       Exchange SinglePartition, true, [id=#253]
+              (1) HashAggregate (keys=[], functions=[partial_count(1)])
+                     (1) SerializeFromObject
+                            (1) MapElements ....
+                                   (1) DeserializeToObject staticinvoke 
+                                          (1) Range(1, 1000000000, step=1, splits=6)
+ // The execution plans are different, because in case of datasets, lambda functions cannot be optimized, and be ignore, even if the result of tha lambda mapping is not used.
+
+ ```
