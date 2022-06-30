@@ -44,3 +44,20 @@ client machine-----------------> Cluster Manager Driver
 Stages are made of task, and each task is an operation on a partition
 Narrow dependencies: partitions that are used to execute individual task in partitions.
 Wide dependencies: multiples partitions are needed to give a result (aggregation, join, sort). Involve shuffle (data transfer between Spark executors)
+
+# Query Planning
+Catalyst Query Optimizer
+
+1. When you start a SQL job, spark knows dependencies (for this performs "unresolved logical transformation plan", arraging dataframes in some graph)
+Catalyst resolves references and expression types of those DF (through "catalog", the action is called "resolving logical plan", and we end with a resolve logical plan).
+2. Logical plan are optimized given "optimize logical plan".
+3. After that spark generates a series of physical plans (series of computations that nodes will perform), and they will be compared with a "cost model", after that one of those physical plan will be chosen as the selected physical plan, and that is the one that we will see in the console. 
+4. After this plan is generated, spark will generate some java/jvm bytecode, so the actual rdd are produce and execute throughout the cluster. 
+
+```
+SQL Query----
+            |----> (1)-->catalog-->(2)--->(3)-->optimized plan-->(3)-->physical plans-->(4)--->Selected physical plan ----->(5)-->RDDs
+DataFrame----
+                   |                                                                                                  |
+                   ----------------------------------------CATALYST QUERY OPTIMIZER------------------------------------
+```
