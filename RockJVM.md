@@ -61,3 +61,33 @@ DataFrame----
                    |                                                                                                  |
                    ----------------------------------------CATALYST QUERY OPTIMIZER------------------------------------
 ```
+
+## Physical Plan Terminology:
+Plan: Read from bottom to top.
+Exchange: it happends when repartition. It could be round robin partition. In the exchange physical plan operation its shown the exhanged column. 
+
+```scala
+val ds1 = spark.range(1, 1000000)
+val ds2 = spark.range(1, 10000000, 2)
+val ds3 = ds1.repartition(7)
+val ds4 = ds2.repartition(9)
+val ds5 = ds3.selectExpr("id*3 as id")
+val joined = ds5.join(ds4, "id")
+val sum = joined.selectExpr("sum(id)")
+sum.explain()
+>>
+(7) HashAggregate(keys=[], functions=[sum(id#18L)])
+       Exchange SinglePartition, true, [id=#99]
+              (6) HashAggregate(keys=[], functions=[partial_sum(id#18L)])
+                     (6) Project[id#18L]
+                            (6) SortMergeJoin [id#18L], [id#12L], Inner
+                                   (3) Sort [id#18L ASC NULL FIRST], false, 0
+                                          Exchange hashpartitioning(id#18L, 200), true, [id=#83]
+                                                 (2) Project[(id#10L * 3) AS id#18L]
+                                                        Exchange RoundRobinParitioning(7), false, [id=#79]
+                                                               (1) Range(1, 1000000, step=1, splits=6)
+                                   (5) Sort [id#12L ASC NULL FIRST], false, 0
+                                          Exchange hashpartitioning(id#12L, 200), true, [id=#90]
+                                                 Exchange RoundRobinPartitioning(9), false, [id=#89]
+                                                        (4) Range (1, 10000000, step=2, splits=6)
+```
