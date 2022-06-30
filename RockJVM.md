@@ -65,6 +65,8 @@ DataFrame----
 ## Physical Plan Terminology:
 Plan: Read from bottom to top.
 Exchange: it happends when repartition. It could be round robin partition. In the exchange physical plan operation its shown the exhanged column. 
+Number of tasks: Number of partitions produced in each stages.
+
 
 ```scala
 val ds1 = spark.range(1, 1000000)
