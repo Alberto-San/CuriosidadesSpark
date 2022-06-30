@@ -143,5 +143,8 @@ dsCount.explain
                                    (1) DeserializeToObject staticinvoke 
                                           (1) Range(1, 1000000000, step=1, splits=6)
  // The execution plans are different, because in case of datasets, lambda functions cannot be optimized, and be ignore, even if the result of tha lambda mapping is not used.
-
  ```
+ 
+ * Do not convert between APIs levels
+ * use DataFrames most of the Time
+ * Kryptonite of Datasets is the lambda optimizations that cannot be achieve. 
