@@ -79,7 +79,7 @@ sum.explain()
 (7) HashAggregate(keys=[], functions=[sum(id#18L)])
        Exchange SinglePartition, true, [id=#99]
               (6) HashAggregate(keys=[], functions=[partial_sum(id#18L)])
-                     (6) Project[id#18L]
+                     (6) Project[id#18L] // SELECTED COLUMN, in this case, selects right id column
                             (6) SortMergeJoin [id#18L], [id#12L], Inner
                                    (3) Sort [id#18L ASC NULL FIRST], false, 0
                                           Exchange hashpartitioning(id#18L, 200), true, [id=#83]
