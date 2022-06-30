@@ -6,6 +6,8 @@ Spark supports 3 cluster managers
 2. Yarn
 3. Mesos
 
+Client vs Cluster mode: https://stackoverflow.com/questions/41124428/spark-yarn-cluster-vs-client-how-to-choose-which-one-to-use
+
 # Spark Driver
 Process that manages the state of the stages/task of the application, and interface with the cluster manager.
 Cluster driver and cluster worker are different than spark driver and woker process. 
