@@ -64,6 +64,15 @@ DataFrame----
                    ----------------------------------------CATALYST QUERY OPTIMIZER------------------------------------
 ```
 
+Steps:
+1. Analysis: turn the unresolved logical plan (dependencie dataframe tree) into result logical plan using catalog engine (use catalog to find where DataFrames, columns are coming from).
+2. Optimizations: the next step is to perform some optimizations in the dependencies tree. Spark can identify some optimizations. 
+3. After the Optimizations, catalog will produce a bunch of Physical Plans, those will be compare and one will be choose. 
+4. Code generation: generate Scala code from execution plan. 
+
+Note: [How catalyst make the optimizations?](Catalyst.pdf)
+
+
 ## Physical Plan Terminology:
 Plan: Read from bottom to top.
 Exchange: it happends when repartition. It could be round robin partition. In the exchange physical plan operation its shown the exhanged column. 
