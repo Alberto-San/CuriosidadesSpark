@@ -74,7 +74,8 @@ Note: [How catalyst make the optimizations?](Catalyst.pdf)
 
 ### Tungsten
 Motivation: read and cache information in a efficient way.
-<a src="https://www.linkedin.com/pulse/catalyst-tungsten-apache-sparks-speeding-engine-deepak-rajak/">More details</a>
+
+<a href="https://www.linkedin.com/pulse/catalyst-tungsten-apache-sparks-speeding-engine-deepak-rajak/">More details</a>
 
 
 ## Physical Plan Terminology:
