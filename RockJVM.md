@@ -47,7 +47,22 @@ Stages are made of task, and each task is an operation on a partition
 Narrow dependencies: partitions that are used to execute individual task in partitions.
 Wide dependencies: multiples partitions are needed to give a result (aggregation, join, sort). Involve shuffle (data transfer between Spark executors)
 
-# Query Planning
+### Constant folding
+process of recognizing and evaluating constant expressions at compile time rather than computing them at runtime. ```lit(1) + lit(2)``` can be optimize just calling ```lit(3)```
+
+### Predicate pushdown
+correpond to where clause in sql. 
+
+### Projection Prunning
+correspond to select just the columns that will be used in the process. 
+
+### Persistent Data
+Cache and Persist are the same operation (```.persist()``` allows to specify where persist data). For uncaching/unpersist just make ```.unpersist()```. Just cache data that will be used in multiple computations, but remember, there is an investment on it, because caching requires time to write data to mem/disk. Do not cache data that will not fit in memory.  Caching RDDs is more costly than dataframes. 
+
+<a href="https://towardsdatascience.com/best-practices-for-caching-in-spark-sql-b22fb0f02d34">More info</a>
+Note: [Caching](Caching.pdf)
+
+### Query Planning
 Catalyst Query Optimizer
 
 1. When you start a SQL job, spark knows dependencies (for this performs "unresolved logical transformation plan", arraging dataframes in some graph)
