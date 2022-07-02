@@ -74,6 +74,9 @@ df5 = d1.withColumn("C5", rand()).join(df4, "C4")
 df5.union(df1).count() // The action will read twice df1, so it will be worth save the precompute value.
 ```
 
+* if a job is slow, use caching
+* if a job is failing, use checkpointing. 
+
 ### Query Planning
 Catalyst Query Optimizer
 
