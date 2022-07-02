@@ -63,6 +63,17 @@ Cache and Persist are the same operation (```.persist()``` allows to specify whe
 <br>
 Note: [Caching](Caching.pdf)
 
+Application
+
+```scala
+df1 = Seq.fill(50)(Random.nextInt).toDF("C1")
+df2 = d1.withColumn("C2", rand()).join(df1, "C1").cache()
+df3 = d1.withColumn("C3", rand()).join(df2, "C2")
+df4 = d1.withColumn("C4", rand()).join(df3, "C3")
+df5 = d1.withColumn("C5", rand()).join(df4, "C4")
+df5.union(df1).count() // The action will read twice df1, so it will be worth save the precompute value.
+```
+
 ### Query Planning
 Catalyst Query Optimizer
 
