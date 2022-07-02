@@ -73,17 +73,8 @@ Steps:
 Note: [How catalyst make the optimizations?](Catalyst.pdf)
 
 ### Tungsten
-Motivation: Big data nowadays are CPU bounded (we have already big network bandwidths). 
-
-Memory management: 
-1. tungsten is able to store information directly in memory, not only in JVM. 
-2. also is able to make cache-aware computations, so that the CPU can access the info in a fast way.
-
-Features:
-1. Manage memory directly
-
-Despite RDD its java manipulation, some tungstein operation are faster in dataframes than rdd because byte representation.
-Remember than tungsten is about storage data in mem or disk, and serialize the information. 
+Motivation: read and cache information in a efficient way.
+<a src="https://www.linkedin.com/pulse/catalyst-tungsten-apache-sparks-speeding-engine-deepak-rajak/">More details</a>
 
 
 ## Physical Plan Terminology:
