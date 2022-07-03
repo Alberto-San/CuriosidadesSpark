@@ -1,4 +1,4 @@
-< a href="https://medium.com/@lackshub/notes-for-databricks-crt020-exam-prep-9fbc97a2147e"> Databricks Preparation test </a>
+<a href="https://medium.com/@lackshub/notes-for-databricks-crt020-exam-prep-9fbc97a2147e"> Databricks Preparation test </a>
 # Spark Cluster Manager
 Is a series of processes. Each process is started in separated machines.
 One of the process is the driver (manage the state of the entire cluster), the other process (worker process) performs the tasks.
