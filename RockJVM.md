@@ -82,7 +82,9 @@ def estimateWithQueryPlan() = {
        println(numbers.queryExecution.optimizedPlan.stats.sizeInBytes) //its worth.
 }
 ```
-* 
+
+### Shuffle Partitioning Exercises 
+[Link](Shuffle.pdf)
 
 ### Persistent Data
 Cache and Persist are the same operation (```.persist()``` allows to specify where persist data). For uncaching/unpersist just make ```.unpersist()```. Just cache data that will be used in multiple computations, but remember, there is an investment on it, because caching requires time to write data to mem/disk. Do not cache data that will not fit in memory.  Caching RDDs is more costly than dataframes. 
