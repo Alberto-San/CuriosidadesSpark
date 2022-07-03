@@ -63,14 +63,14 @@ Coalesce is dont involve shuffle normally (narrow dependency), so it will be in 
 * Use coalesce when you want to <b>REDUCE</b> the number of partitions, and you dont care how data is distributed
 * Use repartition when you want to increase parallelism/number of partitions, or you want to control partition size, or you want to redistribute data evently.
 
-The optimal partition size should be between 10-100MB. You can configure the number of partitions at a shuffle (default is 200, ```spark.sql.shuffle.partitions=100, spark.default.paralellism=100```). 
+The optimal partition size should be between 10-100MB of uncompress data. You can configure the number of partitions at a shuffle (default is 200, ```spark.sql.shuffle.partitions=100, spark.default.paralellism=100```). 
 There are various ways to estimate the size of a dataframe. 
-* One way is cache in a mem or disk and see in spark UI how much size occupies.  
+* One way is cache in a mem or disk and see in spark UI how much size occupies (compress data). 
 * The second way is make a function. Its better to use cache, size estimator could report a higher number.
 ```scala
 def dfSizeEstimator() = {
        val numbers = spark.range(100000)
-       println(org.apache.spark.util.SizeEstimator.estimate(numbers)) //return number of bytes
+       println(org.apache.spark.util.SizeEstimator.estimate(numbers)) //return number of bytes. Gives a larger number because it outputs jvm size object. 
        numbers.cache()
        numbers.count()
 }
@@ -79,7 +79,7 @@ def dfSizeEstimator() = {
 ```scala
 def estimateWithQueryPlan() = {
        val numbers = spark.range(1000)
-       println(numbers.queryExecution.optimizedPlan.stats.sizeInBytes)
+       println(numbers.queryExecution.optimizedPlan.stats.sizeInBytes) //its worth.
 }
 ```
 * 
