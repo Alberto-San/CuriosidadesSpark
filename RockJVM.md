@@ -56,6 +56,13 @@ correpond to where clause in sql.
 ### Projection Prunning
 correspond to select just the columns that will be used in the process. 
 
+### Coalesce vs Repartition
+Coalesce is used to decreased the number of partition, when used to increase is esquivalent to ```coalesce(number, true)```, which is the same as repartition.
+Coalesce is dont involve shuffle normally (narrow dependency), so it will be in the same stage, and repartition, viceversa (wide dependency).
+
+* Use coalesce when you want to <b>REDUCE</b> the number of partitions, and you dont care how data is distributed
+* Use repartition when you want to increase parallelism/number of partitions, or you want to control partition size, or you want to redistribute data evently.
+
 ### Persistent Data
 Cache and Persist are the same operation (```.persist()``` allows to specify where persist data). For uncaching/unpersist just make ```.unpersist()```. Just cache data that will be used in multiple computations, but remember, there is an investment on it, because caching requires time to write data to mem/disk. Do not cache data that will not fit in memory.  Caching RDDs is more costly than dataframes. 
 
