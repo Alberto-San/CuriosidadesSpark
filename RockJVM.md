@@ -85,6 +85,9 @@ def estimateWithQueryPlan() = {
 
 ### Shuffle Partitioning Exercises 
 [Link](Shuffle.pdf)
+<a href="https://stackoverflow.com/questions/66475883/setting-number-of-shuffle-partitions-per-shuffle-in-the-same-spark-job">Guide</a>
+
+You can shuffle data with repartition before a join to increase the number of partitions. 
 
 ### Persistent Data
 Cache and Persist are the same operation (```.persist()``` allows to specify where persist data). For uncaching/unpersist just make ```.unpersist()```. Just cache data that will be used in multiple computations, but remember, there is an investment on it, because caching requires time to write data to mem/disk. Do not cache data that will not fit in memory.  Caching RDDs is more costly than dataframes. 
