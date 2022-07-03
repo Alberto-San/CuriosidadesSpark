@@ -56,12 +56,33 @@ correpond to where clause in sql.
 ### Projection Prunning
 correspond to select just the columns that will be used in the process. 
 
-### Coalesce vs Repartition
+### Coalesce vs Repartition, Partitioning
 Coalesce is used to decreased the number of partition, when used to increase is esquivalent to ```coalesce(number, true)```, which is the same as repartition.
 Coalesce is dont involve shuffle normally (narrow dependency), so it will be in the same stage, and repartition, viceversa (wide dependency).
 
 * Use coalesce when you want to <b>REDUCE</b> the number of partitions, and you dont care how data is distributed
 * Use repartition when you want to increase parallelism/number of partitions, or you want to control partition size, or you want to redistribute data evently.
+
+The optimal partition size should be between 10-100MB. You can configure the number of partitions at a shuffle (default is 200, ```spark.sql.shuffle.partitions=100, spark.default.paralellism=100```). 
+There are various ways to estimate the size of a dataframe. 
+* One way is cache in a mem or disk and see in spark UI how much size occupies.  
+* The second way is make a function. Its better to use cache, size estimator could report a higher number.
+```scala
+def dfSizeEstimator() = {
+       val numbers = spark.range(100000)
+       println(org.apache.spark.util.SizeEstimator.estimate(numbers)) //return number of bytes
+       numbers.cache()
+       numbers.count()
+}
+```
+* The third way is to use query plan
+```scala
+def estimateWithQueryPlan() = {
+       val numbers = spark.range(1000)
+       println(numbers.queryExecution.optimizedPlan.stats.sizeInBytes)
+}
+```
+* 
 
 ### Persistent Data
 Cache and Persist are the same operation (```.persist()``` allows to specify where persist data). For uncaching/unpersist just make ```.unpersist()```. Just cache data that will be used in multiple computations, but remember, there is an investment on it, because caching requires time to write data to mem/disk. Do not cache data that will not fit in memory.  Caching RDDs is more costly than dataframes. 
