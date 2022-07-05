@@ -117,6 +117,9 @@ df5.union(df1).count() // The action will read twice df1, so it will be worth sa
 * if a job is slow, use caching
 * if a job is failing, use checkpointing. 
 
+### Data Skews and Struggling Tasks
+[Link](dataSkewsAndStrugglingTasks.scala)
+
 ### Query Planning
 Catalyst Query Optimizer
 
