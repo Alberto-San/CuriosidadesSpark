@@ -51,6 +51,9 @@ Wide dependencies: multiples partitions are needed to give a result (aggregation
 ### Constant folding
 process of recognizing and evaluating constant expressions at compile time rather than computing them at runtime. ```lit(1) + lit(2)``` can be optimize just calling ```lit(3)```
 
+### Schema DDL trick
+<a href="https://sparkbyexamples.com/spark/convert-case-class-to-spark-schema/"> Link </a>
+
 ### Predicate pushdown
 correpond to where clause in sql. 
 
