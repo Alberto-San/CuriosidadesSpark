@@ -48,6 +48,13 @@ Stages are made of task, and each task is an operation on a partition
 Narrow dependencies: partitions that are used to execute individual task in partitions.
 Wide dependencies: multiples partitions are needed to give a result (aggregation, join, sort). Involve shuffle (data transfer between Spark executors)
 
+### Adaptive query execution
+
+<a href="https://databricks.com/blog/2020/05/29/adaptive-query-execution-speeding-up-spark-sql-at-runtime.html">Link</a>
+<img src="https://databricks.com/wp-content/uploads/2020/05/blog-adaptive-query-execution-5.png">
+<img src="https://databricks.com/wp-content/uploads/2020/05/blog-adaptive-query-execution-6.png">
+
+
 ### Constant folding
 process of recognizing and evaluating constant expressions at compile time rather than computing them at runtime. ```lit(1) + lit(2)``` can be optimize just calling ```lit(3)```
 
