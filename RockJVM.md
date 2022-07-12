@@ -240,3 +240,22 @@ dsCount.explain
  * Do not convert between APIs levels
  * use DataFrames most of the Time
  * Kryptonite of Datasets is the lambda optimizations that cannot be achieve. 
+
+
+### Paritioning and Bucketing
+<b>Partitioning prunning: </b> The scan reads only the directories that match the partition filters, thus reducing disk I/O
+<b>Partitioning Tips: </b>You want to avoid too many small files, which make scans less efficient with excessive parallelism. You also want to avoid having too few large files, which can hurt parallelism.
+
+<b>Bucketing</b> is another data organization technique that groups data with the same bucket value across a fixed number of “buckets.”. This can improve performance in wide transformations and joins by avoiding “shuffles.”. Bucketing is similar to partitioning, but partitioning creates a directory for each partition, whereas bucketing distributes data across a fixed number of buckets by a hash on the bucket value. Tables can be bucketed on more than one value and bucketing can be used with or without partitioning. 
+
+Partitioning should only be used with columns that have a limited number of values; bucketing works well when the number of unique values is large.	
+When to Use Bucket Columns:
+* Table size is big (> 200G).
+* The table has high cardinality columns which are frequently used as filtering and/or joining keys.
+* The sort merge join (without bucket) is slow due to shuffle not due to data skew
+
+Bucketing and saving is almost expensive as a regular shuffle. 
+
+Data Skew: Same key will remain on the same executor. The only way of solve this is turn data in a more uniform way, add data and join/group by noise data and then get rid of it. 
+
+<a href="https://selectfrom.dev/apache-spark-partitioning-bucketing-3fd350816911">More Information</a>
