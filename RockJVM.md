@@ -259,3 +259,85 @@ Bucketing and saving is almost expensive as a regular shuffle.
 Data Skew: Same key will remain on the same executor. The only way of solve this is turn data in a more uniform way, add data and join/group by noise data and then get rid of it. 
 
 <a href="https://selectfrom.dev/apache-spark-partitioning-bucketing-3fd350816911">More Information</a>
+
+```scala
+object joinPartitionerProblems{
+    val initialTable = ???.repartition(10)
+    val narrowTable = (???).repartition(7) // many records
+    val wideTable = f(initialTable) /// many Columns
+
+    //scenario 1
+    val joinSparkPartitioning = wideTable.join(narrowTable, "id")
+    /*
+    QUERY PLAN
+    1. There are 2 shuffles involved, 2 repartitions.
+    2. There is 1 projection, that involves the creation of the wide dataframe.
+
+    Project [id, ...]
+        SortMergeJoin
+            Sort[id]
+                Exchange HashPartitioning(id)
+                    Project // creating the wide dataframe
+                        ExchangeRoundRobinPartitioning(10)
+                            ???
+            Sort[id]
+                Exchange HashPartitioning(id)
+                        ExchangeRoundRobinPartitioning(7)
+                            ???
+    */
+
+
+    //scenario 2
+    val altNarrow = narrowTable.repartition($"id")
+    val altInitial = initialTable.repartition($"id")
+    val joinPrepartitioning = altInitial.join(altNarrow, "id")
+    val result2 = f(joinPrepartitioning) // add many columns
+    /*
+    QUERY PLAN:
+    1. There is only one shuffle stage, and is the hashpartitioning by id. Despite that initialTable is repartition by 10, we are saying that will be repartitioned by id, and because is the same dataframe, it will win the last repartition.
+    2. Because both dataframes has the same partition we've 2 co-partitioned dataframes. (HashPartitioner by id).
+    Note: It is always a good Idea to Partition Early the dataframes, not late. Because late it will cause performance issues as scenario 3
+
+    Project
+        SortMergeJoin
+            Sort
+                Exchange HashPartitioning [id]
+                    ???
+            Sort
+                Exchange HashParitioning [id]
+                    ???
+    */
+
+    //scenario 3
+    val repartitionedNarrow = narrowTable.repartition($"id")
+    val repartitionedWide = wideTable.repartition($"id")
+    val joinNotUseful = repartitionedWide.join(repartitionedNarrow, "id")
+    /*
+    QUERY PLAN
+    1. Because we have a projection in the midle, spark firtst must do repartition(10) and after that repartition by id
+    2. This kind of approach id the same as not doing repartition by id explicitly, because spark will also do that operation by default, so its not worth to put that in the code. 
+
+
+    Project
+        SortMergeJoin
+            Sort
+                Exchange HashPartitioner(id, 200)
+                    Project
+                        ExchangeRoundRobinPartitioning(10)
+                            ???
+            Sort
+                Exchange HashPartitioner(id, 200)
+                    ???
+    */
+}
+
+object bucketing {
+  narrowTable
+  .write
+  .bucketBy(NoBuckets, colBucket1, colBucket2, ???)
+  .sortBy(colBucket1)
+  .saveAsTable(NameTable)
+
+  val table = spark.table(NameTable)
+}
+```
