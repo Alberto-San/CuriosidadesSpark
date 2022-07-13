@@ -350,10 +350,10 @@ object bucketing {
 ```
 
 ### Join Types
-<b>Broadcast Hash Join</b>
-<b>Sort Merge Join</b>
-<b>Shuffle Nested Loop Join</b>
-<b>Sfhuffle Hash Join</b>
+* <b>Broadcast Hash Join</b>
+* <b>Sort Merge Join</b>
+* <b>Shuffle Nested Loop Join</b>
+* <b>Sfhuffle Hash Join</b>
 
 ### UDF
 ### UDAF
