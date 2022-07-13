@@ -350,6 +350,7 @@ object bucketing {
 ```
 
 ### Join Types
+* <b>Hash Join: </b> 
 * <b>Broadcast Hash Join</b>
 * <b>Sort Merge Join</b>
 * <b>Shuffle Nested Loop Join</b>
