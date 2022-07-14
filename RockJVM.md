@@ -9,6 +9,27 @@ Spark supports 3 cluster managers
 
 Client vs Cluster mode: https://stackoverflow.com/questions/41124428/spark-yarn-cluster-vs-client-how-to-choose-which-one-to-use
 
+# Garbage Collector
+Allows automatically free up memory space that has been allocated to objects no longer needed by the program.
+Garbage collector will need to trace through all your Java objects and find the unused ones, in order to open space to new objects.
+The cost of garbage collection is proportional to the number of Java objects
+The first thing to try if GC is a problem is to use serialized caching. ```DF.cache``` (but remember that LRU applies, Least Recently Used)
+Implementation of GC in Java:
+* Java Heap Space is divided in 2 regions: Young and Old
+* Young is composed of [Eden, Survivor 1, Survivor 2]
+* When Eden is Full, GC objects of Eden and Survivor 1 migrate to Survivor 2.
+* If object of Survivor 2 is older enough, or the region if full, migrates to Old
+* When Old is closed to full, GC is invoke to release memory.
+
+The goal of GC in Spark is to store long lived RDDs in Old Region, and to store in Young sufficiently sized to store short-lived objects (task intermedia objects).
+
+Check:
+* If a full GCs is invoked multiple times while executing task -no sufficient mem to execute task-
+* If minor GCs (migrate Young to Old), allocate more resources on Eden.
+* If the OldGen is close to being full, reduce the amount of memory used for caching by lowering spark.memory.fraction; it is better to cache fewer objects than to slow down task execution. 
+
+<img src="https://miro.medium.com/max/1400/1*bfaBln8nWqy5dCE4Dtqq0Q.png">
+
 # Spark Driver
 Process that manages the state of the stages/task of the application, and interface with the cluster manager.
 Cluster driver and cluster worker are different than spark driver and woker process. 
