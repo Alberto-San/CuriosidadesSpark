@@ -382,4 +382,3 @@ object bucketing {
 
 ### UDF
 ### UDAF
-### Garbage collector in spark
