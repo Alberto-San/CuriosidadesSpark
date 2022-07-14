@@ -30,6 +30,9 @@ Check:
 
 <img src="https://miro.medium.com/max/1400/1*bfaBln8nWqy5dCE4Dtqq0Q.png">
 
+# Memory Usage in Spark
+
+
 # Spark Driver
 Process that manages the state of the stages/task of the application, and interface with the cluster manager.
 Cluster driver and cluster worker are different than spark driver and woker process. 
