@@ -412,3 +412,94 @@ object bucketing {
 
 ### UDF
 ### UDAF
+#### Encoders
+Is the fundamental Serialization/Deserialization framework in spark. The following code is a demonstration of how spark serializes and deserialize data in terms of dataset encoders, that happens automatically.
+```scala
+import org.apache.spark.sql.Encoders
+import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
+import org.apache.spark.sql.catalyst.dsl.expressions._
+
+case class Person(id: Long, name: String)
+val jacek = Person(0, "Jacek")
+
+scala> val personEncoder = Encoders.product[Person] //An encoder for Scala's product type (tuples, case classes, etc).
+personEncoder: org.apache.spark.sql.Encoder[Person] = class[id[0]: bigint, name[0]: string]
+val personExprEncoder = personEncoder.asInstanceOf[ExpressionEncoder[Person]]
+val row = personExprEncoder.toRow(jacek) //Serialize a record to the internal representation, i.e. InternalRowrow: org.apache.spark.sql.catalyst.InternalRow = [0,0,1800000005,6b6563614a]
+// Let's deserialize it to a JVM object, i.e. a Scala object
+val attrs = Seq(DslSymbol('id).long, DslSymbol('name).string)
+val jacekReborn = personExprEncoder.resolveAndBind(attrs).fromRow(row) //jacekReborn: Person = Person(0,Jacek)
+```
+
+Steps to build a UDAF for a Dataset in terms of objects:
+1. Extends the classes and declare the input type, intermediate value of the reduction, type of final result.
+ ```scala
+ import org.apache.spark.sql.{Encoder, Encoders, SparkSession}
+import org.apache.spark.sql.expressions.Aggregator
+
+case class Employee(name: String, salary: Long)
+case class Average(var sum: Long, var count: Long)
+object MyAverage extends Aggregator[Employee, // Input Type
+                                    Average,  // Intermedia Buffer Type
+                                    Double // Final output Type
+                                    ] {
+???
+}
+ ```
+2. Declare the initials values of each of the attributes of the intermedia results, and its encoder
+```scala
+def zero: Average = Average(0L, 0L) // because the intermedia type is Average case class.
+def bufferEncoder: Encoder[Average] = Encoders.product
+```
+3. Declare the reduce logic (how the input value will turn into an intermediate value).
+```scala
+def reduce(buffer: Average, employee: Employee): Average = {
+    buffer.sum += employee.salary
+    buffer.count += 1
+    buffer
+  }
+```
+4. Declare how to intermedia values will be merge
+```scala
+  def merge(b1: Average, b2: Average): Average = {
+    b1.sum += b2.sum
+    b1.count += b2.count
+    b1
+  }
+```
+5. Specify what the output function will looks like, and its encoder
+```scala
+def finish(reduction: Average): Double = reduction.sum.toDouble / reduction.count
+def outputEncoder: Encoder[Double] = Encoders.scalaDouble
+```
+6. After those functions are inside the object, register the UDAF and use it.
+```scala
+spark.udf.register("myAverage", functions.udaf(MyAverage))
+val df = spark.read.json("examples/src/main/resources/employees.json")
+df.createOrReplaceTempView("employees")
+df.show()
+// +-------+------+
+// |   name|salary|
+// +-------+------+
+// |Michael|  3000|
+// |   Andy|  4500|
+// | Justin|  3500|
+// |  Berta|  4000|
+// +-------+------+
+
+val result = spark.sql("SELECT myAverage(salary) as average_salary FROM employees")
+result.show()
+// +--------------+
+// |average_salary|
+// +--------------+
+// |        3750.0|
+// +--------------+
+
+```
+7. To use it in a dataset, its more simpler, because you dont need to register as UDAF.
+```scala
+val ds = spark.read.json("examples/src/main/resources/employees.json").as[Employee]
+val averageSalary = MyAverage.toColumn.name("average_salary")
+val result = ds.select(averageSalary)
+```
+
