@@ -45,7 +45,6 @@ In spark, memory management is composed of 2 types:
 ### On Heap Memory
 By default, Spark uses on-heap memory only.
 <img src="https://community.cloudera.com/t5/image/serverpage/image-id/31457iBFE248CFD18E3363/image-size/large?v=v2&px=999">
-* <b></b>
 * <b>Reserve Memory: </b> uses to store spark default objects, and cannot be change (300MB by default).
 * <b>User Memory: </b> used to store user-defined data structures, Spark internal metadata, any UDFs created by the user, the data needed for RDD conversion operations such as the information for RDD dependency information etc. This memory segment is not managed by Spark.
 * <b>Spark Memory (Unified Memory): </b> Spark Memory is responsible for storing intermediate state while doing task execution like joins or storing the broadcast variables. All the cached/persisted data will be stored in this segment, specifically in the storage memory of this segment.
@@ -54,6 +53,11 @@ By default, Spark uses on-heap memory only.
     * Execution memory can also borrow space from Storage memory if blocks are not used in Storage memory.
     * If blocks from Execution memory is used by Storage memory, and Execution needs more memory, it can forcefully evict the excess blocks occupied by Storage Memory
     * If blocks from Storage Memory is used by Execution memory and Storage needs more memory, it cannot forcefully evict the excess blocks occupied by Execution Memory; it will end up having less memory area. It will wait until Spark releases the excess blocks stored by Execution memory and then occupies them.
+
+### Off Heap Memory
+* It can still reduce memory usage, reduce frequent GC, and improve program performance.
+* When an executor is killed, all cached data for that executor would be gone but with off-heap memory, the data would still persist. The lifetime of JVM and lifetime of cached data are decoupled.
+* Stores objects in a serialize way.
 
 
 # Spark Driver
