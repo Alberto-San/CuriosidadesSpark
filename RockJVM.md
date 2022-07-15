@@ -479,3 +479,50 @@ val averageSalary = MyAverage.toColumn.name("average_salary")
 val result = ds.select(averageSalary)
 ```
 
+#### UDAFs in DataFrames (Non-type safe)
+<a href="https://spark.apache.org/docs/latest/sql-ref-functions-udf-aggregate.html">Link</a>
+1. Spefify object, input type, intermedia type, output type
+```scala
+import org.apache.spark.sql.{Encoder, Encoders, SparkSession}
+import org.apache.spark.sql.expressions.Aggregator
+import org.apache.spark.sql.functions
+
+case class Average(var sum: Long, var count: Long)
+
+object MyAverage extends Aggregator[Long, //Long, because is type of field
+                                    Average, 
+                                    Double] {
+???
+}
+```
+2. Define buffer.
+```scala
+def zero: Average = Average(0L, 0L)
+def bufferEncoder: Encoder[Average] = Encoders.product
+```
+3. Define reduce and merge logic
+```scala
+def reduce(buffer: Average, data: Long): Average = {
+    buffer.sum += data
+    buffer.count += 1
+    buffer
+  }
+  // Merge two intermediate values
+def merge(b1: Average, b2: Average): Average = {
+    b1.sum += b2.sum
+    b1.count += b2.count
+    b1
+  }
+```
+4. Define output logic
+```scala
+def finish(reduction: Average): Double = reduction.sum.toDouble / reduction.count
+def outputEncoder: Encoder[Double] = Encoders.scalaDouble
+```
+5. Register the function and executes. It could be accesible from spark sql, pyspark, ... or you can use it directly (see <a href="https://docs.databricks.com/spark/latest/spark-sql/udaf-scala.html">Link</a>)
+```scala
+spark.udf.register("myAverage", functions.udaf(MyAverage))
+val df = spark.read.json("examples/src/main/resources/employees.json")
+df.createOrReplaceTempView("employees")
+val result = spark.sql("SELECT myAverage(salary) as average_salary FROM employees")
+```
