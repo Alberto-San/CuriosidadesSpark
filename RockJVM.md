@@ -431,7 +431,7 @@ val attrs = Seq(DslSymbol('id).long, DslSymbol('name).string)
 val jacekReborn = personExprEncoder.resolveAndBind(attrs).fromRow(row) //jacekReborn: Person = Person(0,Jacek)
 ```
 
-Steps to build a UDAF for a Dataset in terms of objects:
+#### Steps to build a UDAF for a Dataset in terms of objects:
 1. Extends the classes and declare the input type, intermediate value of the reduction, type of final result.
  ```scala
  import org.apache.spark.sql.{Encoder, Encoders, SparkSession}
@@ -472,31 +472,7 @@ def reduce(buffer: Average, employee: Employee): Average = {
 def finish(reduction: Average): Double = reduction.sum.toDouble / reduction.count
 def outputEncoder: Encoder[Double] = Encoders.scalaDouble
 ```
-6. After those functions are inside the object, register the UDAF and use it.
-```scala
-spark.udf.register("myAverage", functions.udaf(MyAverage))
-val df = spark.read.json("examples/src/main/resources/employees.json")
-df.createOrReplaceTempView("employees")
-df.show()
-// +-------+------+
-// |   name|salary|
-// +-------+------+
-// |Michael|  3000|
-// |   Andy|  4500|
-// | Justin|  3500|
-// |  Berta|  4000|
-// +-------+------+
-
-val result = spark.sql("SELECT myAverage(salary) as average_salary FROM employees")
-result.show()
-// +--------------+
-// |average_salary|
-// +--------------+
-// |        3750.0|
-// +--------------+
-
-```
-7. To use it in a dataset, its more simpler, because you dont need to register as UDAF.
+6. To use it in a dataset, its more simpler, because you dont need to register as UDAF.
 ```scala
 val ds = spark.read.json("examples/src/main/resources/employees.json").as[Employee]
 val averageSalary = MyAverage.toColumn.name("average_salary")
