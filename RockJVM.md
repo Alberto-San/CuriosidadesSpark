@@ -411,6 +411,17 @@ object bucketing {
 * <b>Sfhuffle Hash Join</b>
 
 ### UDF
+When using UDFs or UDAFs written in non-JVM languages, such as Python, it is important to note that you lose much of the perfor‐ mance benefit, as the data must still be transferred out of the JVM (but in the case of python that could be mostly resolved with the pandas API). If most of your work is in Python but you want to access some UDFs without the performance penalty, you can write your UDFs in Scala and register them for use in Python.
+```scala
+val plusOne = udf((x: Int) => x + 1) //define udf
+spark.udf.register("plusOne", plusOne) // register
+spark.sql("SELECT plusOne(1)")//use
+```
+* Spark treats udfs as black boxes, so it cannot be optimized
+* Spark mantains string in UTF-8, while some verions of java in UTF-16, so maybe you need to do manually conversion and that comes at a cost.
+
+<b>Note: </b> to overcome the previous thing, see <a src="https://databricks.com/it/session_eu20/optimizing-apache-spark-udfs">Link</a>
+
 ### UDAF
 #### Encoders
 Is the fundamental Serialization/Deserialization framework in spark. The following code is a demonstration of how spark serializes and deserialize data in terms of dataset encoders, that happens automatically.
