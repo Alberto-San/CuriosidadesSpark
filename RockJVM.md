@@ -45,6 +45,8 @@ In spark, memory management is composed of 2 types:
 ### On Heap Memory
 By default, Spark uses on-heap memory only.
 <img src="https://community.cloudera.com/t5/image/serverpage/image-id/31457iBFE248CFD18E3363/image-size/large?v=v2&px=999">
+<img src="https://russianblogs.com/images/369/1ea881d4ddb7af70c336e7d052394751.png">
+<img src="https://miro.medium.com/max/1400/1*5VR7QSyoz1kFuFCuYKqB7w.png">
 * <b>Reserve Memory: </b> uses to store spark default objects, and cannot be change (300MB by default).
 * <b>User Memory: </b> used to store user-defined data structures, Spark internal metadata, any UDFs created by the user, the data needed for RDD conversion operations such as the information for RDD dependency information etc. This memory segment is not managed by Spark.
 * <b>Spark Memory (Unified Memory): </b> Spark Memory is responsible for storing intermediate state while doing task execution like joins or storing the broadcast variables. All the cached/persisted data will be stored in this segment, specifically in the storage memory of this segment.
