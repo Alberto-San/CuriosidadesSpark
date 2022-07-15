@@ -431,7 +431,7 @@ val attrs = Seq(DslSymbol('id).long, DslSymbol('name).string)
 val jacekReborn = personExprEncoder.resolveAndBind(attrs).fromRow(row) //jacekReborn: Person = Person(0,Jacek)
 ```
 
-#### Steps to build a UDAF for a Dataset in terms of objects:
+#### Steps to build a UDAF for a Dataset in terms of objects (datasets are type-safe):
 1. Extends the classes and declare the input type, intermediate value of the reduction, type of final result.
  ```scala
  import org.apache.spark.sql.{Encoder, Encoders, SparkSession}
