@@ -32,6 +32,7 @@ Check:
 <img src="https://miro.medium.com/max/1400/1*bfaBln8nWqy5dCE4Dtqq0Q.png">
 
 # Memory Usage in Spark
+<a href="https://community.cloudera.com/t5/Community-Articles/Spark-Memory-Management/ta-p/317794">More Information</a>
 <img src="https://community.cloudera.com/t5/image/serverpage/image-id/31614iEBC942A7C6D4A6A1/image-size/large?v=v2&px=999">
 JVM memory can have 2 parts: Heap Space (GC acts) and Off-Heap Space (GC do nothing, objects are store outside the JVM by serializartion).
 In spark, memory management is composed of 2 types:
