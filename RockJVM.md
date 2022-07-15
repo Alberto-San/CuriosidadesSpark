@@ -58,7 +58,7 @@ By default, Spark uses on-heap memory only.
 * It can still reduce memory usage, reduce frequent GC, and improve program performance.
 * When an executor is killed, all cached data for that executor would be gone but with off-heap memory, the data would still persist. The lifetime of JVM and lifetime of cached data are decoupled.
 * Stores objects in a serialize way.
-* Project Tungsten store information in this kind of heap. Tungsten also has the feature of WholeCodeGeneration (spark DAGs). Spark SQL and RDD transformation can be benefit from Tungsten. 
+* Project Tungsten store information in this kind of heap. Tungsten also has the feature of WholeCodeGeneration (spark DAGs). Spark SQL and RDD transformation can be benefit from Tungsten. Wherever WholeCodeGeneration is present in your DAG, it means that Tungsten is active.
 
 
 # Spark Driver
