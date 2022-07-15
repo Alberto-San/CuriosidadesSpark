@@ -48,7 +48,7 @@ By default, Spark uses on-heap memory only.
 * <b>Reserve Memory: </b> uses to store spark default objects, and cannot be change (300MB by default).
 * <b>User Memory: </b> used to store user-defined data structures, Spark internal metadata, any UDFs created by the user, the data needed for RDD conversion operations such as the information for RDD dependency information etc. This memory segment is not managed by Spark.
 * <b>Spark Memory (Unified Memory): </b> Spark Memory is responsible for storing intermediate state while doing task execution like joins or storing the broadcast variables. All the cached/persisted data will be stored in this segment, specifically in the storage memory of this segment.
-<ul>
+* <ul>
        Storage and Execution pool borrowing rules:
        <li>Storage memory can borrow space from execution memory only if blocks are not used in Execution memory.</li>
        <li>Execution memory can also borrow space from Storage memory if blocks are not used in Storage memory.</li>
