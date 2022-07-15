@@ -15,6 +15,7 @@ Garbage collector will need to trace through all your Java objects and find the 
 The cost of garbage collection is proportional to the number of Java objects
 The first thing to try if GC is a problem is to use serialized caching. ```DF.cache``` (but remember that LRU applies, Least Recently Used)
 Implementation of GC in Java:
+
 * Java Heap Space is divided in 2 regions: Young and Old
 * Young is composed of [Eden, Survivor 1, Survivor 2]
 * When Eden is Full, GC objects of Eden and Survivor 1 migrate to Survivor 2.
@@ -34,10 +35,11 @@ Check:
 <img src="https://community.cloudera.com/t5/image/serverpage/image-id/31614iEBC942A7C6D4A6A1/image-size/large?v=v2&px=999">
 JVM memory can have 2 parts: Heap Space (GC acts) and Off-Heap Space (GC do nothing, objects are store outside the JVM by serializartion).
 In spark, memory management is composed of 2 types:
+
 * Static Memory Manager: Divide the memory into equal partitions. Is fixed. Does not support the use of off-heap memory. Deprecated because lack of flexibility. 
 * Unified Memory Manager: Replace SMM, to provide spark with dynamic memory allocation. The storage and execution share this memory. If any of the storage or execution memory needs more space, increase one and decrease the other. Spark tasks operate in two main memory regions: <b>Execution</b> – Used for shuffles, joins, sorts and aggregations , <b>Storage</b> – Used to cache partitions of data. 
 * Storage UMM: any persist option that includes MEMORY in it, Spark will store that data in this segment, Spark clears space for new cache requests by removing old cached objects based on Least Recently Used (LRU) mechanism, Once the cached data it is out of storage, it is either written to disk or recomputed based on configuration. Broadcast variables are stored in cache with MEMORY_AND_DISK persistent level.
-* Execution UMM: 
+* Execution UMM
 
 ### On Heap Memory
 By default, Spark uses on-heap memory only.
