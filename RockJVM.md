@@ -39,7 +39,7 @@ In spark, memory management is composed of 2 types:
 * Static Memory Manager: Divide the memory into equal partitions. Is fixed. Does not support the use of off-heap memory. Deprecated because lack of flexibility. 
 * Unified Memory Manager: Replace SMM, to provide spark with dynamic memory allocation. The storage and execution share this memory. If any of the storage or execution memory needs more space, increase one and decrease the other. Spark tasks operate in two main memory regions: <b>Execution</b> – Used for shuffles, joins, sorts and aggregations , <b>Storage</b> – Used to cache partitions of data. 
 * Storage UMM: any persist option that includes MEMORY in it, Spark will store that data in this segment, Spark clears space for new cache requests by removing old cached objects based on Least Recently Used (LRU) mechanism, Once the cached data it is out of storage, it is either written to disk or recomputed based on configuration. Broadcast variables are stored in cache with MEMORY_AND_DISK persistent level.
-* Execution UMM
+* Execution UMM: For example, it is used to store shuffle intermediate buffer on the Map side in memory. Also, it is used to store hash table for hash aggregation step. Execution memory tends to be more short-lived than storage. It is evicted immediately after each operation, making space for the next ones.
 
 ### On Heap Memory
 By default, Spark uses on-heap memory only.
@@ -48,6 +48,14 @@ By default, Spark uses on-heap memory only.
 * <b>Reserve Memory: </b> uses to store spark default objects, and cannot be change (300MB by default).
 * <b>User Memory: </b> used to store user-defined data structures, Spark internal metadata, any UDFs created by the user, the data needed for RDD conversion operations such as the information for RDD dependency information etc. This memory segment is not managed by Spark.
 * <b>Spark Memory (Unified Memory): </b> Spark Memory is responsible for storing intermediate state while doing task execution like joins or storing the broadcast variables. All the cached/persisted data will be stored in this segment, specifically in the storage memory of this segment.
+<ul>
+       Storage and Execution pool borrowing rules:
+       <li>Storage memory can borrow space from execution memory only if blocks are not used in Execution memory.</li>
+       <li>Execution memory can also borrow space from Storage memory if blocks are not used in Storage memory.</li>
+       <li>If blocks from Execution memory is used by Storage memory, and Execution needs more memory, it can forcefully evict the excess blocks occupied by Storage Memory
+</li>
+       <li>If blocks from Storage Memory is used by Execution memory and Storage needs more memory, it cannot forcefully evict the excess blocks occupied by Execution Memory; it will end up having less memory area. It will wait until Spark releases the excess blocks stored by Execution memory and then occupies them.</li>
+</ul>
 
 # Spark Driver
 Process that manages the state of the stages/task of the application, and interface with the cluster manager.
